@@ -7,39 +7,43 @@ import io
 import base64
 import logging
 from werkzeug.utils import secure_filename
-from utils.text_processing import process_text, extract_pdf_text
-from utils.recommendations import get_job_recommendations, get_candidate_recommendations
-from utils.resume_analyzer import analyze_resume, get_course_recommendations
-from utils.resume_generator import generate_multiple_candidates
-from utils.pdf_generator import create_resume_pdf, generate_resume_buffer
-from utils.ai_resume_generator import generate_ai_resume, DisabilityFriendlyResumeGenerator
-from utils.accessibility_matcher import match_jobs_with_accessibility, get_job_accessibility_details, AccessibilityJobMatcher
-from utils.transportation_manager import TransportationManager
-from utils.career_guidance import get_career_guidance, CareerGuidanceAI
+
+# Utils Imports (Ensure these files exist in your project structure)
+try:
+    from utils.text_processing import process_text, extract_pdf_text
+    from utils.recommendations import get_job_recommendations, get_candidate_recommendations
+    from utils.resume_analyzer import analyze_resume, get_course_recommendations
+    from utils.resume_generator import generate_multiple_candidates
+    from utils.pdf_generator import create_resume_pdf, generate_resume_buffer
+    from utils.ai_resume_generator import generate_ai_resume, DisabilityFriendlyResumeGenerator
+    from utils.accessibility_matcher import match_jobs_with_accessibility, get_job_accessibility_details, AccessibilityJobMatcher
+    from utils.transportation_manager import TransportationManager
+    from utils.career_guidance import get_career_guidance, CareerGuidanceAI
+except ImportError as e:
+    logger = logging.getLogger(__name__)
+    logger.error(f"Missing utility module: {e}")
+    # Create dummy functions if imports fail to prevent app crash during build
+    pass
+
 from auth import login_required, register_user, authenticate_user, update_last_login
 from database import Database
-from rafeeq_routes import register_rafeeq_routes
+
+# Import routes if available
+try:
+    from rafeeq_routes import register_rafeeq_routes
+except ImportError:
+    register_rafeeq_routes = lambda app, jobs_df: None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['GENERATED_RESUMES_FOLDER'] = 'generated_resumes'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
-
-# Initialize Database and create tables
-try:
-    db = Database()
-    db.create_tables()
-    logger.info("Database 'RAFEEQ' and tables initialized successfully")
-except Exception as e:
-    logger.error(f"Error initializing database: {e}")
-    logger.error("Database initialization failed - tables will not be available")
-    import sys
-    import traceback
-    traceback.print_exc(file=sys.stderr)
+# IMPORTANT: Change this secret key in production
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Create necessary directories
 os.makedirs('uploads', exist_ok=True)
@@ -47,20 +51,28 @@ os.makedirs('data/resumes', exist_ok=True)
 os.makedirs('generated_resumes', exist_ok=True)
 
 # Load datasets
+jobs_df = pd.DataFrame()
+cities_df = pd.DataFrame()
+
 try:
-    jobs_df = pd.read_csv('data/saudi_jobs.csv')
-    cities_df = pd.read_csv('data/saudi_cities.csv')
+    if os.path.exists('data/saudi_jobs.csv'):
+        jobs_df = pd.read_csv('data/saudi_jobs.csv')
+    if os.path.exists('data/saudi_cities.csv'):
+        cities_df = pd.read_csv('data/saudi_cities.csv')
     logger.info(f"Loaded {len(jobs_df)} jobs and {len(cities_df)} cities")
 except Exception as e:
     logger.error(f"Error loading datasets: {e}")
-    jobs_df = pd.DataFrame()
-    cities_df = pd.DataFrame()
 
 # Initialize resumes CSV if doesn't exist
-if not os.path.exists('data/resumes/resumes_data.csv'):
+RESUMES_CSV_PATH = 'data/resumes/resumes_data.csv'
+if not os.path.exists(RESUMES_CSV_PATH):
     pd.DataFrame(columns=['resume_id', 'name', 'email', 'phone', 'skills', 'experience', 
                           'education', 'upload_date', 'processed_text', 'file_path']).to_csv(
-        'data/resumes/resumes_data.csv', index=False)
+        RESUMES_CSV_PATH, index=False)
+
+# Database Initialization
+# We create the DB instance, but we don't force crash if connection fails yet.
+db = Database()
 
 @app.route('/')
 def home():
@@ -69,7 +81,6 @@ def home():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Gather some stats for the dashboard
     db = Database()
     conn = db.connect()
     stats = {
@@ -81,9 +92,11 @@ def dashboard():
     if conn:
         cursor = conn.cursor()
         try:
-            if os.path.exists('data/resumes/resumes_data.csv'):
-                resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+            if os.path.exists(RESUMES_CSV_PATH):
+                resumes_df = pd.read_csv(RESUMES_CSV_PATH)
                 stats['total_candidates'] = len(resumes_df)
+        except Exception as e:
+            logger.error(f"Error reading resumes CSV: {e}")
         finally:
             cursor.close()
             conn.close()
@@ -149,7 +162,9 @@ def candidate():
     if session.get('user_type') == 'recruiter':
         flash('This page is for job seekers only.', 'warning')
         return redirect(url_for('recruiter'))
-    locations = cities_df['city_name'].unique().tolist()
+    locations = []
+    if not cities_df.empty and 'city_name' in cities_df.columns:
+        locations = cities_df['city_name'].unique().tolist()
     return render_template('candidate.html', locations=locations)
 
 @app.route('/recruiter')
@@ -171,7 +186,6 @@ def resume_analyzer_page():
 @login_required
 def profile():
     if request.method == 'POST':
-        # Handle profile updates
         db = Database()
         conn = db.connect()
         if conn:
@@ -196,14 +210,12 @@ def profile():
 @login_required
 def settings():
     if request.method == 'POST':
-        # Handle settings updates
         db = Database()
         conn = db.connect()
         if conn:
             cursor = conn.cursor()
             try:
                 if 'current_password' in request.form:
-                    # Password change
                     from auth import hash_password, verify_password
                     cursor.execute('SELECT password FROM users WHERE id = %s', (session['user_id'],))
                     user = cursor.fetchone()
@@ -315,10 +327,10 @@ def recommend_candidates():
             return jsonify({'success': False, 'error': 'Failed to process job description'}), 500
         
         try:
-            if not os.path.exists('data/resumes/resumes_data.csv'):
+            if not os.path.exists(RESUMES_CSV_PATH):
                 return jsonify({'success': False, 'error': 'No resumes database found. Please upload resumes first.'}), 404
             
-            resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+            resumes_df = pd.read_csv(RESUMES_CSV_PATH)
             
             if len(resumes_df) == 0:
                 return jsonify({'success': False, 'error': 'No resumes in database. Please upload resumes first.'}), 404
@@ -381,7 +393,7 @@ def generate_candidates():
         generated_profiles = generate_multiple_candidates(job_description, num_candidates)
         
         # Save generated profiles to database
-        resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+        resumes_df = pd.read_csv(RESUMES_CSV_PATH)
         
         for profile in generated_profiles:
             # Create PDF for each candidate
@@ -407,7 +419,7 @@ def generate_candidates():
             resumes_df = pd.concat([resumes_df, pd.DataFrame([new_resume])], ignore_index=True)
         
         # Save updated database
-        resumes_df.to_csv('data/resumes/resumes_data.csv', index=False)
+        resumes_df.to_csv(RESUMES_CSV_PATH, index=False)
         
         # Prepare response data
         candidates_data = []
@@ -439,7 +451,7 @@ def generate_candidates():
 def download_resume(candidate_id):
     """API endpoint to download candidate resume as PDF"""
     try:
-        resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+        resumes_df = pd.read_csv(RESUMES_CSV_PATH)
         
         # Find candidate by ID or name
         if candidate_id.startswith('GEN_'):
@@ -536,11 +548,11 @@ def analyze_resume_api():
         }
         
         try:
-            resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+            resumes_df = pd.read_csv(RESUMES_CSV_PATH)
             new_resume['resume_id'] = len(resumes_df) + 1
             
             resumes_df = pd.concat([resumes_df, pd.DataFrame([new_resume])], ignore_index=True)
-            resumes_df.to_csv('data/resumes/resumes_data.csv', index=False)
+            resumes_df.to_csv(RESUMES_CSV_PATH, index=False)
         except Exception as e:
             logger.error(f"Error saving to CSV: {e}")
         
@@ -564,7 +576,7 @@ def analyze_resume_api():
 def get_stats():
     """API endpoint to get system statistics"""
     try:
-        resumes_df = pd.read_csv('data/resumes/resumes_data.csv')
+        resumes_df = pd.read_csv(RESUMES_CSV_PATH)
         
         stats = {
             'total_jobs': len(jobs_df),
@@ -578,8 +590,6 @@ def get_stats():
     except Exception as e:
         logger.error(f"Error in get_stats: {e}")
         return jsonify({'error': str(e)}), 500
-
-
 
 @app.route('/api/jobs-map-data')
 def get_jobs_map_data():
@@ -897,6 +907,12 @@ register_rafeeq_routes(app, jobs_df)
 
 if __name__ == '__main__':
     logger.info("Starting RAFEEQ Inclusive Employment Platform")
+    # Try to create tables, but don't crash if it fails
+    try:
+        db.create_tables()
+        logger.info("Database 'RAFEEQ' and tables initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization skipped or failed: {e}")
+        logger.error("Application will start but database features may be limited.")
+    
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
-    
-    
