@@ -903,16 +903,24 @@ def get_analytics():
         return jsonify({'error': str(e)}), 500
 
 # Register RAFEEQ routes
-register_rafeeq_routes(app, jobs_df)
+try:
+    from rafeeq_routes import register_rafeeq_routes
+    register_rafeeq_routes(app, jobs_df)
+except ImportError:
+    pass
+
+# Initialize DB at startup (Runs on both Local and Render)
+# We do this here so it runs every time the app starts, ensuring tables exist.
+logger.info("Attempting to initialize database...")
+try:
+    db.create_tables()
+    logger.info("Database 'RAFEEQ' and tables initialized successfully")
+except Exception as e:
+    # If DB fails (e.g., IP not whitelisted yet), log error but don't crash the app
+    logger.error(f"Database initialization failed: {e}")
+    logger.error("App will start, but Login/Register features will not work until DB is accessible.")
 
 if __name__ == '__main__':
-    logger.info("Starting RAFEEQ Inclusive Employment Platform")
-    # Try to create tables, but don't crash if it fails
-    try:
-        db.create_tables()
-        logger.info("Database 'RAFEEQ' and tables initialized successfully")
-    except Exception as e:
-        logger.error(f"Database initialization skipped or failed: {e}")
-        logger.error("Application will start but database features may be limited.")
-    
+    logger.info("Starting RAFEEQ Inclusive Employment Platform locally...")
+    # Note: Tables are already initialized above, so we don't need to call it here again.
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
