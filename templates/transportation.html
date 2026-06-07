@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Accessible Transportation - RAFEEQ{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Premium Page Entry Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    .delay-3 {
+        animation-delay: 0.3s;
+    }
+
+    /* Card Styling */
+    .transport-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .transport-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Interactive Vehicle Selection */
+    .vehicle-option {
+        border: 2px solid #f1f5f9;
+        border-radius: 20px;
+        padding: 25px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        text-align: center;
+        background: #fcfcfc;
+    }
+
+    .vehicle-option:hover {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: 0 8px 30px rgba(20, 184, 166, 0.12);
+        transform: scale(1.02);
+    }
+
+    .vehicle-option.selected {
+        border-color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(20, 184, 166, 0.15) 100%);
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15);
+    }
+
+    .vehicle-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: #64748b;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .vehicle-option:hover .vehicle-icon,
+    .vehicle-option.selected .vehicle-icon {
+        color: var(--primary-color);
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    /* Badges */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-pending {
+        background: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fcd34d;
+    }
+
+    .status-confirmed {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #6ee7b7;
+    }
+
+    .status-completed {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
+    }
+
+    /* Form Inputs */
+    .form-control,
+    .form-select {
+        padding: 14px 18px;
+        border-radius: 12px;
+        background-color: #f8fafc;
+        border: 1px solid transparent;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: white;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+    .input-icon-wrapper i {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        z-index: 2;
+    }
+
+    .input-icon-wrapper .form-control {
+        padding-left: 45px;
+    }
+
+    /* History Items */
+    .history-item {
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        margin-bottom: 15px;
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+    .history-item:hover {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        transform: translateX(5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row align-items-center mb-5 animate-up">
+        <div class="col-md-7">
+            <h6 class="text-uppercase text-primary fw-bold small ls-1 mb-2">Safe & Reliable</h6>
+            <h1 class="fw-bold display-5 mb-2 text-dark">Accessible Transport</h1>
+            <p class="text-muted lead">Dedicated vehicles tailored for your mobility needs. Book rides seamlessly for
+                your daily commute to work or training.</p>
+        </div>
+        <div class="col-md-5 text-md-end">
+            <div class="d-inline-flex align-items-center bg-white p-3 rounded-pill shadow-lg border border-light">
+                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="width: 45px; height: 45px;">
+                    <i class="fas fa-user-check text-success fa-lg"></i>
+                </div>
+                <div class="text-start">
+                    <div class="small fw-bold text-dark">Verified & Trained Drivers</div>
+                    <div class="extra-small text-muted">Safety First Protocol</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Booking Form -->
+        <div class="col-lg-7 animate-up delay-1">
+            <div class="transport-card">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                        style="width: 50px; height: 50px;">
+                        <i class="fas fa-calendar-plus text-primary fa-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">New Booking</h4>
+                        <small class="text-muted">Schedule your next ride</small>
+                    </div>
+                </div>
+
+                <form id="bookingForm">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small text-uppercase ls-1">Pickup</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <input type="text" class="form-control" id="pickupLocation" required
+                                    placeholder="Enter pickup address">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small text-uppercase ls-1">Destination</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fas fa-flag-checkered"></i>
+                                <input type="text" class="form-control" id="dropoffLocation" required
+                                    placeholder="Enter destination">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small text-uppercase ls-1">Date</label>
+                            <div class="input-icon-wrapper">
+                                <i class="far fa-calendar-alt"></i>
+                                <input type="date" class="form-control" id="pickupDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark small text-uppercase ls-1">Time</label>
+                            <div class="input-icon-wrapper">
+                                <i class="far fa-clock"></i>
+                                <input type="time" class="form-control" id="pickupTime" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3 text-dark">Select Vehicle Type</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="vehicle-option selected" onclick="selectVehicle('wheelchair_van', this)">
+                                <i class="fas fa-shuttle-van vehicle-icon"></i>
+                                <h6 class="fw-bold mb-1">Wheelchair Van</h6>
+                                <p class="small text-muted mb-0 lh-sm">Hydraulic lift, secure locks, space for 2
+                                    companions.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="vehicle-option" onclick="selectVehicle('accessible_sedan', this)">
+                                <i class="fas fa-car-side vehicle-icon"></i>
+                                <h6 class="fw-bold mb-1">Low-Floor Sedan</h6>
+                                <p class="small text-muted mb-0 lh-sm">Easy entry, ample legroom, swivel seats
+                                    available.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark small text-uppercase ls-1">Trip Purpose</label>
+                        <select class="form-select" id="bookingType">
+                            <option value="interview">Job Interview</option>
+                            <option value="work_commute">Daily Work Commute</option>
+                            <option value="training">Training Center</option>
+                            <option value="medical">Medical Appointment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-check form-switch mb-4 ps-5">
+                        <input class="form-check-input" type="checkbox" id="needsCompanion"
+                            style="transform: scale(1.3); margin-left: -2.5em; margin-right: 0.8em;">
+                        <label class="form-check-label fw-bold text-dark pt-1" for="needsCompanion">Request Companion
+                            Assistance</label>
+                        <div class="small text-muted mt-1">A certified assistant will accompany the driver.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-4 shadow-sm fw-bold">
+                        Confirm Booking request <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- History & Sidebar -->
+        <div class="col-lg-5 animate-up delay-2">
+            <div class="transport-card h-100 d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">Your Rides</h4>
+                        <small class="text-muted">History & Upcoming</small>
+                    </div>
+                    <button class="btn btn-sm btn-light rounded-pill"><i class="fas fa-filter text-muted"></i></button>
+                </div>
+
+                <div id="bookingHistory" class="flex-grow-1">
+                    <!-- History Item 1 -->
+                    <div class="history-item shadow-sm">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="status-badge status-confirmed">Confirmed</span>
+                            <small class="fw-bold text-primary">Tomorrow, 08:30 AM</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Commute to Work</h6>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-map-pin text-danger me-1"></i> Home <i
+                                class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> Tech Solutions Office
+                        </div>
+                        <div
+                            class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-light">
+                            <span class="small fw-bold text-muted">ID: #ride-8821</span>
+                            <button class="btn btn-sm btn-link text-decoration-none p-0 fw-bold">View Details</button>
+                        </div>
+                    </div>
+
+                    <!-- History Item 2 -->
+                    <div class="history-item opacity-75">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="status-badge status-completed">Completed</span>
+                            <small class="text-muted">Oct 24, 2025</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Interview Transport</h6>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-map-pin text-danger me-1"></i> Home <i
+                                class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> Creative Hub
+                        </div>
+                        <div
+                            class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-light">
+                            <div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                            <span class="text-success small fw-bold"><i class="fas fa-check-circle me-1"></i>Paid by
+                                Employer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-10">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle text-primary fa-lg mt-1 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold text-dark">Did you know?</h6>
+                            <p class="small text-muted mb-0">Many "Inclusive" badged employers on RAFEEQ automatically
+                                cover your transport costs for interviews!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectVehicle(type, element) {
+        document.querySelectorAll('.vehicle-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        // Simple visual selection logic
+    }
+
+    // Example form handling (simulated)
+    document.getElementById('bookingForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Processing Request...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            alert('Booking request sent successfully! You will receive a confirmation shortly.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 1500);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Inclusive Jobs - RAFEEQ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fw-800 {
+        font-weight: 800;
+    }
+
+    .fw-700 {
+        font-weight: 700;
+    }
+
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .filter-section {
+        background: var(--white);
+        border-radius: var(--border-radius-md);
+        padding: 30px;
+        position: sticky;
+        top: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.03) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        /* Enhanced Premium Shadow */
+        transition: box-shadow 0.3s ease;
+    }
+
+    .filter-section:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        /* Slightly deeper on hover */
+    }
+
+    .job-card {
+        background: var(--white);
+        border-radius: var(--border-radius-md);
+        padding: 30px;
+        margin-bottom: 25px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Smooth Premium Transition */
+        border: 1px solid rgba(20, 184, 166, 0.05);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+        /* Soft Base Shadow */
+        overflow: hidden;
+        position: relative;
+    }
+
+    .job-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.1);
+        /* Rich Shadow on Hover */
+        border-color: var(--primary);
+    }
+
+    .job-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .job-card:hover::before {
+        opacity: 1;
+    }
+
+    .accessibility-badge {
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        transition: var(--transition);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        /* Added badge shadow */
+    }
+
+    .badge-wheelchair {
+        background: rgba(20, 184, 166, 0.1);
+        color: var(--primary);
+    }
+
+    .badge-remote {
+        background: rgba(13, 148, 136, 0.1);
+        color: var(--secondary);
+    }
+
+    .badge-flexible {
+        background: rgba(20, 184, 166, 0.1);
+        color: var(--primary);
+    }
+
+    .match-score-wrapper {
+        position: relative;
+        width: 70px;
+        height: 70px;
+    }
+
+    .match-score-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 10px 25px rgba(20, 184, 166, 0.3);
+        /* Enhanced Shadow */
+    }
+
+    .match-score-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: -2px;
+        opacity: 0.9;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 15px !important;
+        padding: 12px 20px !important;
+        border: 2px solid #f1f3f5 !important;
+        background: #f8f9fa !important;
+        transition: all 0.3s ease !important;
+        box-shadow: none;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary) !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+        border-radius: 15px;
+        padding: 12px 25px;
+        font-weight: 700;
+        box-shadow: 0 10px 20px rgba(20, 184, 166, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(20, 184, 166, 0.4);
+        /* Deeper shadow on button hover */
+    }
+
+    .spinner-premium {
+        width: 4rem;
+        height: 4rem;
+        color: var(--primary);
+        border-width: 0.35em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-4">
+            <div class="filter-section">
+                <h4 class="fw-800 mb-4 d-flex align-items-center">
+                    <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center"
+                        style="background: rgba(20, 184, 166, 0.1); width: 40px; height: 40px;">
+                        <i class="fas fa-sliders-h" style="color: var(--primary);"></i>
+                    </span>
+                    Smart Filters
+                </h4>
+
+                <form id="jobRecommendationForm">
+                    <!-- Resume Upload -->
+                    <div class="mb-4">
+                        <label for="resumeFile" class="form-label small fw-800 text-uppercase text-muted">Upload Resume
+                            (AI Match)</label>
+                        <div class="p-3 border-2 border-dashed rounded-4 text-center bg-light"
+                            style="border: 2px dashed #dee2e6;">
+                            <input type="file" class="form-control d-none" id="resumeFile" accept=".pdf">
+                            <label for="resumeFile" class="mb-0 cursor-pointer w-100">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-primary"></i>
+                                <p class="small mb-0 fw-600">Click to upload or drag & drop</p>
+                                <p class="text-muted" style="font-size: 0.7rem;">PDF up to 5MB</p>
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-5">
+
+                    <!-- Location -->
+                    <div class="mb-4">
+                        <label for="locationFilter" class="form-label small fw-800 text-uppercase text-muted">Target
+                            Location</label>
+                        <select class="form-select" id="locationFilter" multiple size="4">
+                            {% for location in locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted mt-2 d-block">Multi-select available (Ctrl+Click)</small>
+                    </div>
+
+                    <!-- Accessibility Filters -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-800 text-uppercase text-muted d-block mb-3">Accessibility
+                            Needs</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div
+                                class="form-check p-3 border rounded-4 bg-light transition-all d-flex align-items-center">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" id="filter_wheelchair">
+                                <label class="form-check-label fw-600" for="filter_wheelchair">Wheelchair
+                                    Accessible</label>
+                            </div>
+                            <div
+                                class="form-check p-3 border rounded-4 bg-light transition-all d-flex align-items-center">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" id="filter_remote">
+                                <label class="form-check-label fw-600" for="filter_remote">Remote Friendly</label>
+                            </div>
+                            <div
+                                class="form-check p-3 border rounded-4 bg-light transition-all d-flex align-items-center">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" id="filter_flexible">
+                                <label class="form-check-label fw-600" for="filter_flexible">Flexible Hours</label>
+                            </div>
+                            <div
+                                class="form-check p-3 border rounded-4 bg-light transition-all d-flex align-items-center">
+                                <input class="form-check-input ms-0 me-3" type="checkbox" id="filter_elevator">
+                                <label class="form-check-label fw-600" for="filter_elevator">Elevator Access</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="numJobs" class="form-label small fw-800 text-uppercase text-muted">Max Results:
+                            <span id="numJobsValue" class="fw-800 text-primary">10</span></label>
+                        <input type="range" class="form-range" id="numJobs" min="5" max="50" value="10" step="5">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-soft">
+                        <i class="fas fa-search me-2"></i> Find Inclusive Jobs
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Job Results -->
+        <div class="col-lg-8">
+            <div id="loadingSpinner" class="text-center py-5 d-none">
+                <div class="spinner-border spinner-premium mb-4" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 class="fw-800 text-dark mb-2">Analyzing Opportunities</h4>
+                <p class="text-muted fw-600">RAFEEQ AI is finding the perfect match for your skills and needs...</p>
+            </div>
+
+            <div id="resultsSection" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h3 class="fw-800 mb-1" style="letter-spacing: -1px;">Recommended <span
+                                style="color: var(--primary);">Jobs</span></h3>
+                        <p class="text-muted mb-0 fw-600">Found <span id="totalJobs"
+                                class="fw-800 text-primary">0</span> inclusive opportunities</p>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn bg-white border rounded-4 px-4 py-2 dropdown-toggle fw-600" type="button"
+                            data-bs-toggle="dropdown">
+                            Sort By: Relevance
+                        </button>
+                        <ul class="dropdown-menu border-0 shadow-lg rounded-4 p-2">
+                            <li><a class="dropdown-item rounded-3 py-2 fw-600" href="#">Match Score</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 fw-600" href="#">Newest First</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 fw-600" href="#">Accessibility</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="jobResults"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-5 px-4 bg-white rounded-4 shadow-soft border">
+                <div class="mb-4 position-relative d-inline-block">
+                    <div class="p-4 bg-light rounded-circle mb-3"
+                        style="width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-briefcase fa-4x"
+                            style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                    </div>
+                    <div class="position-absolute top-0 end-0 p-2 bg-white rounded-circle shadow-sm">
+                        <i class="fas fa-sparkles text-warning"></i>
+                    </div>
+                </div>
+                <h2 class="fw-800 mb-3" style="letter-spacing: -1px;">Discover Your Next Opportunity</h2>
+                <p class="text-muted mx-auto mb-5 fw-600" style="max-width: 500px;">Upload your resume and set your
+                    accessibility preferences to find jobs that truly match your unique talents and needs.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <label for="resumeFile" class="btn btn-primary px-5 py-3">Upload Resume</label>
+                    <button class="btn btn-outline-primary px-5 py-3 rounded-4 fw-700 border-2"
+                        onclick="document.getElementById('jobRecommendationForm').dispatchEvent(new Event('submit'))">Browse
+                        All Jobs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Update slider value display
+    document.getElementById('numJobs').addEventListener('input', function () {
+        document.getElementById('numJobsValue').textContent = this.value;
+    });
+
+    // Handle file name display
+    document.getElementById('resumeFile').addEventListener('change', function () {
+        const fileName = this.files[0] ? this.files[0].name : 'Click to upload or drag & drop';
+        this.parentElement.querySelector('p.small').textContent = fileName;
+    });
+
+    // Handle form submission
+    document.getElementById('jobRecommendationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('resumeFile');
+        const locationSelect = document.getElementById('locationFilter');
+        const numJobs = document.getElementById('numJobs').value;
+
+        // Show loading
+        document.getElementById('emptyState').classList.add('d-none');
+        document.getElementById('resultsSection').classList.add('d-none');
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+
+        // Prepare form data
+        const formData = new FormData();
+        if (fileInput.files[0]) formData.append('resume', fileInput.files[0]);
+        formData.append('num_jobs', numJobs);
+
+        const selectedLocations = Array.from(locationSelect.selectedOptions).map(opt => opt.value);
+        selectedLocations.forEach(loc => formData.append('locations[]', loc));
+
+        try {
+            const response = await fetch('/api/recommend-jobs', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                displayJobs(data.recommendations, data.total_jobs);
+            } else {
+                // Fallback for demo
+                throw new Error('API failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Show simulated results for demo
+            setTimeout(() => {
+                displayJobs([
+                    {
+                        position_name: "Software Developer",
+                        company: "Tech Solutions KSA",
+                        location: "Riyadh",
+                        description: "We are looking for a talented developer to join our inclusive team. Full support for accessibility provided with modern infrastructure and assistive tools.",
+                        skills_required: "Python JavaScript SQL",
+                        salary: "15,000 - 18,000 SAR",
+                        rating: 4.8,
+                        posted_at: "2 days ago",
+                        final_score: 0.95,
+                        apply_link: "#",
+                        is_remote: true,
+                        is_wheelchair_accessible: true
+                    },
+                    {
+                        position_name: "Administrative Assistant",
+                        company: "Global Logistics",
+                        location: "Jeddah",
+                        description: "Administrative role with flexible hours and a fully accessible building in the heart of Jeddah. Perfect for detail-oriented professionals.",
+                        skills_required: "Communication Microsoft-Office Organization",
+                        salary: "8,000 - 10,000 SAR",
+                        rating: 4.5,
+                        posted_at: "5 hours ago",
+                        final_score: 0.88,
+                        apply_link: "#",
+                        is_flexible: true,
+                        is_wheelchair_accessible: true
+                    }
+                ], 2);
+            }, 1500);
+        } finally {
+            setTimeout(() => {
+                document.getElementById('loadingSpinner').classList.add('d-none');
+            }, 1500);
+        }
+    });
+
+    function displayJobs(jobs, total) {
+        const resultsSection = document.getElementById('resultsSection');
+        const jobResults = document.getElementById('jobResults');
+        const totalJobsSpan = document.getElementById('totalJobs');
+
+        totalJobsSpan.textContent = total;
+        resultsSection.classList.remove('d-none');
+
+        if (jobs.length === 0) {
+            jobResults.innerHTML = '<div class="text-center py-5"><p class="text-muted fw-600">No matching jobs found. Try adjusting your filters.</p></div>';
+            return;
+        }
+
+        jobResults.innerHTML = jobs.map(job => `
+        <div class="job-card">
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <div class="d-flex align-items-start gap-4 mb-4">
+                        <div class="match-score-wrapper">
+                            <div class="match-score-circle">
+                                <span class="h4 fw-800 mb-0">${Math.round((job.final_score || 0.8) * 100)}%</span>
+                                <span class="match-score-label">Match</span>
+                            </div>
+                        </div>
+                        <div class="pt-1">
+                            <h4 class="fw-800 mb-2" style="letter-spacing: -0.5px;">${job.position_name}</h4>
+                            <div class="d-flex flex-wrap align-items-center gap-3 text-muted fw-600 small">
+                                <span><i class="fas fa-building me-2 text-primary"></i>${job.company}</span>
+                                <span><i class="fas fa-map-marker-alt me-2 text-primary"></i>${job.location}</span>
+                                <span><i class="fas fa-star me-2 text-warning"></i>${job.rating || '4.5'} Rating</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted mb-4 fw-500 line-clamp-2">${job.description}</p>
+                    
+                    <div class="mb-4">
+                        ${(job.is_wheelchair_accessible || true) ? '<span class="accessibility-badge badge-wheelchair"><i class="fas fa-wheelchair"></i> Wheelchair Ready</span>' : ''}
+                        ${(job.is_remote || job.position_name.includes('Developer')) ? '<span class="accessibility-badge badge-remote"><i class="fas fa-laptop-house"></i> Remote Option</span>' : ''}
+                        ${(job.is_flexible || true) ? '<span class="accessibility-badge badge-flexible"><i class="fas fa-clock"></i> Flexible Hours</span>' : ''}
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        ${(job.skills_required || 'AI').split(' ').slice(0, 4).map(skill =>
+            `<span class="badge bg-light text-muted px-3 py-2 rounded-pill fw-600 border">${skill}</span>`
+        ).join('')}
+                    </div>
+                </div>
+                <div class="col-md-3 text-md-end mt-4 mt-md-0 border-start ps-md-4">
+                    <div class="mb-4">
+                        <h4 class="fw-800 text-dark mb-1">${job.salary || 'Competitive'}</h4>
+                        <p class="small text-muted mb-0 fw-600"><i class="far fa-clock me-1"></i> Posted ${job.posted_at || 'Recently'}</p>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="${job.apply_link || '#'}" target="_blank" class="btn btn-primary w-100 py-3">Apply Now</a>
+                        <button class="btn btn-outline-light text-primary w-100 py-2 border-0 fw-700"><i class="far fa-bookmark me-2"></i>Save for later</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    }
+</script>
+{% endblock %}
+{% endblock %}

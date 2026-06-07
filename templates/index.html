@@ -1,0 +1,959 @@
+{% extends "base.html" %}
+
+{% block title %}RAFEEQ - Empowering Inclusive Employment{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== ROOT VARIABLES ==================== */
+    :root {
+        --primary-color: #14b8a6;
+        --secondary-color: #0d9488;
+        --primary-gradient: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        --secondary-gradient: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        --dark-color: #063d5c;
+        --darker-color: #04293e;
+        --white: #ffffff;
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --border-radius-lg: 30px;
+        --shadow-lg: 0 15px 50px rgba(20, 184, 166, 0.15);
+        --footer-dark: #081E2A;
+        --footer-darker: #071923;
+        --teal-accent: #18D1C8;
+    }
+
+    /* Reset some base.html styles for Landing Page */
+    body.landing-mode {
+        background-color: var(--white);
+        direction: ltr;
+        text-align: left;
+        padding-top: 80px;
+        /* لحساب ارتفاع النافبار الثابت */
+    }
+
+    /* ==================== CURVED NAVBAR ==================== */
+    .navbar-curved {
+        background: linear-gradient(135deg, #26ba9d 0%, #14b8a6 40%, #063d5c 100%) !important;
+        backdrop-filter: blur(20px);
+        transition: var(--transition);
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1050;
+        padding: 12px 0 25px; /* زيادة البادنج السفلي ليتناسب مع الكليب باث */
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        clip-path: ellipse(100% 100% at 50% 0%);
+    }
+
+    /* إزالة الأشكال المنحنية القديمة لأننا سنستخدم clip-path */
+    .navbar-curved::after, .navbar-curved::before {
+        display: none !important;
+    }
+
+    .navbar-curved .container {
+        max-width: 1400px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Logo Container - Compact */
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 18px 6px 14px;
+        border-radius: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        transition: var(--transition);
+    }
+
+    .logo-container:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--teal-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(24, 209, 200, 0.3);
+    }
+
+    .logo-container img {
+        height: 42px;
+        width: auto;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+        padding: 6px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand-text {
+        color: white;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand-text span {
+        background: linear-gradient(135deg, #2dd4bf 0%, var(--teal-accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Nav Links - Compact without underline */
+    .navbar-curved a {
+        text-decoration: none !important;
+    }
+
+    .nav-item-custom {
+        margin: 0 6px;
+        position: relative;
+    }
+
+    .nav-link-custom {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 600;
+        padding: 6px 14px !important;
+        border-radius: 30px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        font-size: 1rem;
+        letter-spacing: 0.2px;
+        text-decoration: none !important;
+    }
+
+    /* إزالة الخط تحت الروابط تماماً */
+    .nav-link-custom:hover {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-1px);
+        text-decoration: none !important;
+    }
+
+    .nav-link-custom.active {
+        color: white !important;
+        background: rgba(24, 209, 200, 0.15);
+        border: 1px solid rgba(24, 209, 200, 0.3);
+        text-decoration: none !important;
+    }
+
+    /* Buttons - Compact */
+    .btn-nav-login {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: white !important;
+        padding: 8px 22px;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: var(--transition);
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .btn-nav-login:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: var(--teal-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(24, 209, 200, 0.3);
+    }
+
+    .btn-nav-register {
+        background: linear-gradient(135deg, var(--teal-accent) 0%, #14b8a6 100%);
+        color: white !important;
+        padding: 9px 26px;
+        border-radius: 30px;
+        font-weight: 700;
+        border: none;
+        box-shadow: 0 6px 20px rgba(24, 209, 200, 0.4);
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-nav-register:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(24, 209, 200, 0.6);
+    }
+
+    /* Mobile Menu Toggle */
+    .navbar-toggler-custom {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 6px;
+        transition: var(--transition);
+    }
+
+    .navbar-toggler-custom:hover {
+        border-color: var(--teal-accent);
+        transform: rotate(90deg);
+    }
+
+    .navbar-toggler-custom .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Mobile Menu */
+    @media (max-width: 992px) {
+        body.landing-mode {
+            padding-top: 70px;
+        }
+
+        .navbar-collapse-custom {
+            background: linear-gradient(135deg, #26ba9d 0%, #14b8a6 40%, #063d5c 100%);
+            padding: 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item-custom {
+            margin: 6px 0;
+        }
+
+        .btn-nav-login,
+        .btn-nav-register {
+            width: 100%;
+            margin: 8px 0;
+            text-align: center;
+        }
+
+        .logo-container {
+            padding: 5px 12px;
+        }
+
+        .brand-text {
+            font-size: 1.4rem;
+        }
+
+        /* تعديل الشكل المنحني للجوال */
+        .navbar-curved::after {
+            border-radius: 0 0 30px 30px;
+        }
+
+        .navbar-curved::before {
+            border-radius: 0 0 40px 40px;
+        }
+    }
+
+    /* Navbar Animation */
+    @keyframes slideDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .navbar-curved {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    /* Navbar Scrolled Effect */
+    .navbar-curved.scrolled {
+        padding: 8px 0 20px;
+        background: linear-gradient(135deg, rgba(10, 110, 90, 0.98) 0%, rgba(25, 66, 61, 0.98) 40%, rgba(6, 61, 92, 0.98) 100%) !important;
+        backdrop-filter: blur(25px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .navbar-curved.scrolled::after, .navbar-curved.scrolled::before {
+        display: none !important;
+    }
+
+    /* بقية الأنماط تبقى كما هي (Hero, Features, Footer) */
+
+    /* ==================== HERO SECTION ==================== */
+    .hero-container {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        min-height: 600px;
+        overflow: hidden;
+        background: #000;
+        border-bottom-left-radius: 120px;
+        border-bottom-right-radius: 120px;
+        display: flex;
+        align-items: center;
+        margin-top: -80px;
+        /* لتعويض ارتفاع النافبار */
+        
+    }
+
+    /* طبقة الصورة */
+    .hero-image-full {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 80% 20%;
+        transform: scale(1.02);
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(6, 61, 92, 0.8) 0%, rgba(6, 61, 92, 0.3) 60%, transparent 100%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        color: white;
+        max-width: 800px;
+        padding-top: 80px;
+        /* تعويض للنافبار الثابت */
+    }
+
+    .hero-title {
+        font-size: 5rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 1.5rem;
+        letter-spacing: -2px;
+        text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-title span {
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: block;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 3rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 20px;
+    }
+
+    .btn-creative-1 {
+        background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+        color: white !important;
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 25px rgba(20, 184, 166, 0.4);
+        transition: var(--transition);
+        border: none;
+    }
+
+    .btn-creative-1:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(20, 184, 166, 0.6);
+    }
+
+    .btn-creative-2 {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white !important;
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        transition: var(--transition);
+        border: none;
+    }
+
+    .btn-creative-2:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(99, 102, 241, 0.6);
+    }
+
+    /* تحسين العرض على اللابتوبات المتوسطة */
+    @media (max-width: 1200px) {
+        .hero-title {
+            font-size: 4rem;
+        }
+
+        .hero-image-full {
+            object-position: 85% 20%;
+        }
+    }
+
+    /* التابلت */
+    @media (max-width: 992px) {
+        .hero-container {
+            height: 85vh;
+            border-bottom-left-radius: 90px;
+            border-bottom-right-radius: 90px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+        }
+
+        .hero-image-full {
+            object-position: 90% 20%;
+        }
+    }
+
+    /* الجوال */
+    @media (max-width: 576px) {
+        .hero-container {
+            height: auto;
+            padding: 140px 0 80px;
+            border-bottom-left-radius: 60px;
+            border-bottom-right-radius: 60px;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+        }
+
+        .btn-creative-1,
+        .btn-creative-2 {
+            text-align: center;
+        }
+    }
+
+    /* ==================== FEATURES SECTION ==================== */
+    .section-padding {
+        padding: 100px 0;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .section-title span {
+        color: var(--primary-color);
+    }
+
+    .feature-card {
+        background: white;
+        padding: 40px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        transition: var(--transition);
+        border: 1px solid rgba(20, 184, 166, 0.05);
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(20, 184, 166, 0.2);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(20, 184, 166, 0.1);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 25px;
+        transition: var(--transition);
+    }
+
+    .feature-card:hover .feature-icon {
+        background: var(--primary-gradient);
+        color: white;
+        transform: rotate(10deg);
+    }
+
+    /* ==================== CTA SECTION ==================== */
+    .btn-register {
+        background: linear-gradient(135deg, rgba(10, 110, 90, 0.98) 0%, rgba(25, 66, 61, 0.98) 40%, rgba(6, 61, 92, 0.98) 100%) !important;
+        color: white !important;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+        box-shadow: 0 10px 30px rgba(10, 110, 90, 0.3);
+        text-decoration: none !important;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(10, 110, 90, 0.5);
+        filter: brightness(1.1);
+    }
+
+    /* ==================== FOOTER SECTION ==================== */
+    .footer-section {
+        position: relative;
+         background: linear-gradient(135deg, rgba(10, 110, 90, 0.98) 0%, rgba(25, 66, 61, 0.98) 40%, rgba(6, 61, 92, 0.98) 100%) !important;
+        color: #ffffff;
+        padding: 180px 0 60px;
+        overflow: hidden;
+        clip-path: ellipse(100% 100% at 50% 100%);
+        margin-top: -100px; /* لدمجه مع القسم السابق بشكل جمالي */
+    }
+
+    /* Glow Effect */
+    .footer-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 70% 20%,
+                rgba(255, 255, 255, 0.1),
+                transparent 60%);
+        pointer-events: none;
+    }
+
+    /* Remove legacy curve */
+    .footer-curve {
+        display: none !important;
+    }
+
+    /* Logo */
+    .footer-logo img {
+        height: 65px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 12px 18px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transition: var(--transition);
+    }
+
+    .footer-logo img:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Text */
+    .footer-desc {
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.8;
+        margin-bottom: 30px;
+        font-size: 1.05rem;
+    }
+
+    .footer-title {
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: white;
+        font-size: 1.25rem;
+        position: relative;
+    }
+
+    .footer-title::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: var(--teal-accent);
+        border-radius: 2px;
+    }
+
+    /* Links */
+    .footer-links {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 15px;
+    }
+
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.75);
+        text-decoration: none !important;
+        transition: var(--transition);
+        display: inline-block;
+    }
+
+    .footer-links a:hover {
+        color: var(--teal-accent);
+        transform: translateX(8px);
+    }
+
+    /* Social */
+    .footer-socials a {
+        display: inline-flex;
+        width: 45px;
+        height: 45px;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 12px;
+        margin-right: 12px;
+        transition: var(--transition);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-decoration: none !important;
+    }
+
+    .footer-socials a:hover {
+        background: var(--teal-accent);
+        color: var(--dark-color);
+        transform: translateY(-5px) rotate(8deg);
+        border-color: var(--teal-accent);
+        box-shadow: 0 10px 20px rgba(24, 209, 200, 0.3);
+    }
+
+    /* Newsletter */
+    .footer-newsletter {
+        display: flex;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 5px;
+    }
+
+    .footer-newsletter input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 12px 15px;
+        color: #ffffff;
+        outline: none;
+    }
+
+    .footer-newsletter input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .footer-newsletter button {
+        background: var(--teal-accent);
+        border: none;
+        padding: 0 25px;
+        color: var(--dark-color);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border-radius: 12px;
+    }
+
+    .footer-newsletter button:hover {
+        background: white;
+        transform: scale(1.02);
+    }
+
+    /* Divider */
+    .footer-divider {
+        border-color: rgba(255, 255, 255, 0.15);
+        margin: 50px 0 25px;
+    }
+
+    /* Bottom */
+    .footer-bottom p,
+    .footer-bottom span {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+    }
+
+    .footer-bottom i {
+        color: #ff4d4f;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تأثير التمرير للنافبار
+    document.addEventListener('DOMContentLoaded', function () {
+        const navbar = document.querySelector('.navbar-curved');
+
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 30) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // تفعيل الروابط النشطة بدون تأثيرات تحت الخط
+        const navLinks = document.querySelectorAll('.nav-link-custom');
+        const sections = document.querySelectorAll('section');
+
+        function activateLink() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', activateLink);
+
+        // تفعيل الروابط عند النقر
+        navLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                // إزالة النشط من جميع الروابط
+                navLinks.forEach(item => item.classList.remove('active'));
+                // إضافة النشط للرابط المختار
+                this.classList.add('active');
+
+                // التمرير السلس للقسم
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Curved Navbar -->
+<nav class="navbar navbar-expand-lg navbar-curved">
+    <div class="container">
+        <!-- Logo Container -->
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="RAFEEQ Logo">
+                <div class="brand-text">RAF<span>EEQ</span></div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse navbar-collapse-custom" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item nav-item-custom">
+                    <a class="nav-link-custom active" href="#hero">Home</a>
+                </li>
+                <li class="nav-item nav-item-custom">
+                    <a class="nav-link-custom" href="#features">Features</a>
+                </li>
+                <li class="nav-item nav-item-custom">
+                    <a class="nav-link-custom" href="#about">About</a>
+                </li>
+                <li class="nav-item nav-item-custom ms-lg-3">
+                    <a href="/login" class="btn-nav-login">Login</a>
+                </li>
+                <li class="nav-item nav-item-custom">
+                    <a href="/register" class="btn-nav-register">Join Now</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section (Just the Image) -->
+<div id="hero" class="hero-container">
+    <img src="{{ url_for('static', filename='images/hero2.png') }}" alt="RAFEEQ Hero" class="hero-image-full">
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content" data-aos="fade-right">
+            <h1 class="hero-title">
+                Ability Beyond<br>
+                <span>Limits</span>
+            </h1>
+            <p class="hero-subtitle">
+                Unlock your professional potential with the first AI-powered ecosystem
+                dedicated to inclusive employment in Saudi Arabia.
+            </p>
+            <div class="hero-actions">
+                <a href="/register" class="btn-creative-1">Start Your Journey</a>
+                <a href="#features" class="btn-creative-2">Explore Features</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section id="features" class="section-padding">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Why Choose <span>RAFEEQ</span>?</h2>
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>AI Ability Match</h4>
+                    <p class="text-muted">Our sophisticated ML algorithms shift the focus from medical disability to
+                        functional capability, matching you with the perfect role.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h4>Accessibility First</h4>
+                    <p class="text-muted">In-depth environmental data ensures every job recommendation accounts for
+                        architectural accessibility and workplace facilities.</p>
+                </div>
+            </div>
+            <!-- Feature 2.5 (Transportation) -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shuttle-van"></i>
+                    </div>
+                    <h4>Mobility Support</h4>
+                    <p class="text-muted">Integrated mobility management system ensures that logistical barriers never
+                        stand in the way of your professional success.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h4>AI Resume Analyzer</h4>
+                    <p class="text-muted">Professional resume analysis that highlights your unique strengths and skills
+                        for inclusive employers.</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Inclusive Employers</h4>
+                    <p class="text-muted">Connect with organizations committed to diversity, receiving pre-vetted
+                        candidates ready to excel.</p>
+                </div>
+            </div>
+            <!-- Feature 5 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Data Insights</h4>
+                    <p class="text-muted">Regional authorities gain data-driven insights into inclusion rates to drive
+                        infrastructure and policy improvements.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section id="about" class="section-padding" style="background: #f0fdfa;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center" data-aos="zoom-in">
+                <h2 class="fw-bold mb-4">Ready to Transform Your Future?</h2>
+                <p class="text-muted mb-5 fs-5">Join RAFEEQ today and be part of an ecosystem that celebrates ability
+                    over limitation. Together, we bridge the gap between talent and opportunity.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="/register" class="btn-register btn-lg px-5 py-3">Create Your Account Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer-section">
+    <div class="container position-relative">
+        <div class="row g-5">
+
+            <!-- Logo & About -->
+            <div class="col-lg-4">
+                <div class="footer-logo mb-4">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="RAFEEQ Logo">
+                </div>
+                <p class="footer-desc">
+                    The first AI-powered ecosystem in Saudi Arabia dedicated to empowering individuals with disabilities
+                    through functional ability matching.
+                </p>
+                <div class="footer-socials">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <!-- Platform -->
+            <div class="col-lg-2 col-md-4">
+                <h5 class="footer-title">Platform</h5>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="/login">Job Board</a></li>
+                    <li><a href="/register">Join Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div class="col-lg-2 col-md-4">
+                <h5 class="footer-title">Company</h5>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="col-lg-4 col-md-4">
+                <h5 class="footer-title">Stay Updated</h5>
+                <p class="footer-desc">
+                    Subscribe to our newsletter for the latest updates on inclusive employment.
+                </p>
+                <div class="footer-newsletter">
+                    <input type="email" placeholder="Email address">
+                    <button>Join</button>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="row align-items-center footer-bottom">
+            <div class="col-md-6 text-center text-md-start">
+                <p>© 2024 RAFEEQ Inclusive Ecosystem. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <span>Made with <i class="fas fa-heart"></i> for Saudi Vision 2030</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

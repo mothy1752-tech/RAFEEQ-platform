@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RAFEEQ - Empowering Abilities{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Premium Color Palette - Updated to match logo navy */
+            --primary-color: #14b8a6;
+            --secondary-color: #0d9488;
+            --accent-color: #14b8a6;
+            --gradient-primary: linear-gradient(135deg, #14b8a6 0%, #0d9488 50%, #063d5c 100%);
+            --gradient-secondary: linear-gradient(135deg, #063d5c 0%, #14b8a6 100%);
+            --gradient-topbar: linear-gradient(90deg, rgba(6, 61, 92, 0.95) 0%, rgba(20, 184, 166, 0.95) 100%);
+
+            /* UI Colors */
+            --dark: #063d5c;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --sidebar-bg: #04293e;
+
+            /* UI Variables */
+            --sidebar-width: 280px;
+            --topbar-height: 80px;
+            --border-radius-lg: 20px;
+            --border-radius-md: 15px;
+            --border-radius-sm: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 4px 20px rgba(6, 61, 92, 0.08);
+            --shadow-md: 0 8px 30px rgba(6, 61, 92, 0.12);
+            --shadow-lg: 0 15px 40px rgba(6, 61, 92, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 10px;
+            border: 2px solid #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+        }
+
+        /* === LAYOUT STRUCTURE === */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* === ENHANCED SIDEBAR DESIGN === */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, #063d5c 0%, #0d9488 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        /* SVG Pattern Overlay */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .brand-section {
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .brand-logo-container:hover {
+            transform: translateX(5px);
+        }
+
+        .brand-logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .brand-logo-container:hover .brand-logo-image {
+            transform: rotate(-5deg) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .brand-text-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-tagline {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-section-label {
+            color: #64748b;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 1.5rem 0 0.75rem 0.75rem;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--gradient-primary);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            padding-left: 1.25rem;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover i {
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(20, 184, 166, 0.1) 0%, rgba(6, 61, 92, 0.1) 100%);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .nav-link.active i {
+            color: var(--primary-color);
+        }
+
+        /* User Profile Section */
+        .user-profile-section {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .user-profile-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info h6 {
+            color: #ffffff;
+            font-weight: 600;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .user-info small {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        /* === PREMIUM TOPBAR DESIGN === */
+        .topbar {
+            height: var(--topbar-height);
+            background: var(--gradient-topbar);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 999;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-title {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: #ffffff;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* === CONTENT AREA === */
+        .content-area {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: calc(var(--topbar-height) + 2rem) 2rem 2rem 2rem;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Landing Page Mode */
+        body.landing-mode {
+            background-color: white;
+        }
+
+        body.landing-mode .content-area {
+            margin-left: 0;
+            padding: 0;
+        }
+
+        body.landing-mode .topbar,
+        body.landing-mode .sidebar {
+            display: none !important;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                left: 0;
+            }
+
+            .content-area {
+                margin-left: 0;
+                padding: calc(var(--topbar-height) + 1rem) 1rem 1rem 1rem;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                padding: 0 1rem;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body
+    class="{% set is_landing = (request.path == '/' or request.path == '/login' or request.path == '/register') and not session.get('user_id') %}{% if is_landing %}landing-mode{% endif %}">
+
+    <!-- Dashboard Layout Wrappers (Only rendered if NOT landing page) -->
+    {% if not is_landing %}
+    <div class="main-wrapper">
+        <!-- Enhanced Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="brand-section">
+                {% set home_url = '/recruiter' if session.get('user_type') == 'recruiter' else '/dashboard' %}
+                <a href="{{ home_url }}" class="brand-logo-container">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="RAFEEQ Logo"
+                        class="brand-logo-image" style="background: white; padding: 5px;">
+                    <div class="brand-text-container">
+                        <span class="brand-name">RAFEEQ</span>
+                        <span class="brand-tagline">Empowering Abilities</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="nav-menu">
+                {% if session.get('user_type') == 'recruiter' %}
+                <!-- ===== EMPLOYER NAVIGATION ===== -->
+                <div class="nav-section-label">Employer Menu</div>
+                <a href="/recruiter" class="nav-link {% if request.path == '/recruiter' %}active{% endif %}">
+                    <i class="fas fa-building"></i>
+                    <span>Employer Dashboard</span>
+                </a>
+                <a href="/recruiter#candidates" class="nav-link {% if request.path == '/recruiter' and request.args.get('tab') == 'candidates' %}active{% endif %}" onclick="activateTab('candidates')">
+                    <i class="fas fa-search"></i>
+                    <span>Find Candidates</span>
+                </a>
+                <a href="/recruiter#post-job" class="nav-link" onclick="activateTab('post-job')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Post a Job</span>
+                </a>
+
+                <div class="nav-section-label">Tools</div>
+                <a href="/analytics" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="/jobs-map" class="nav-link {% if request.path == '/jobs-map' %}active{% endif %}">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Jobs Map</span>
+                </a>
+
+                {% else %}
+                <!-- ===== CANDIDATE / JOB SEEKER NAVIGATION ===== -->
+                <div class="nav-section-label">Main Menu</div>
+                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/candidate" class="nav-link {% if request.path == '/candidate' %}active{% endif %}">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Inclusive Jobs</span>
+                </a>
+                <a href="/resume-builder" class="nav-link {% if request.path == '/resume-builder' %}active{% endif %}">
+                    <i class="fas fa-magic"></i>
+                    <span>AI Resume Builder</span>
+                </a>
+                <a href="/analytics" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+
+                <div class="nav-section-label">Services</div>
+                <a href="/transportation" class="nav-link {% if request.path == '/transportation' %}active{% endif %}">
+                    <i class="fas fa-shuttle-van"></i>
+                    <span>Transportation</span>
+                </a>
+                <a href="/career-guidance" class="nav-link {% if request.path == '/career-guidance' %}active{% endif %}">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Career Guidance</span>
+                </a>
+                <a href="/jobs-map" class="nav-link {% if request.path == '/jobs-map' %}active{% endif %}">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Jobs Map</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="user-profile-section">
+                <a href="/settings" class="nav-link mb-2 {% if request.path == '/settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+
+                <div class="user-profile-card">
+                    <img src="https://ui-avatars.com/api/?name={{ session.get('username', 'User') }}&background=random&color=fff&bold=true"
+                        class="user-avatar" alt="User Avatar">
+                    <div class="user-info">
+                        <h6>{{ session.get('full_name', session.get('username', 'User')) }}</h6>
+                        <small>{{ 'Employer' if session.get('user_type') == 'recruiter' else 'Job Seeker' }}</small>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Premium Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            </div>
+
+            <div class="topbar-right">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search jobs, tools...">
+                </div>
+
+                <div class="notification-wrapper">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge"></span>
+                    </button>
+                </div>
+
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            {% endif %}
+
+            <!-- Main Content Block -->
+            {% block content %}{% endblock %}
+
+            <!-- Closing Dashboard Wrappers -->
+            {% if not is_landing %}
+        </div> <!-- Close content-area -->
+    </div> <!-- Close main-wrapper -->
+    {% endif %}
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Update page title based on current page
+        document.addEventListener('DOMContentLoaded', function () {
+            const path = window.location.pathname;
+            const pageTitle = document.getElementById('pageTitle');
+
+            const titles = {
+                '/dashboard': 'Dashboard',
+                '/candidate': 'Inclusive Jobs',
+                '/resume-builder': 'AI Resume Builder',
+                '/analytics': 'Analytics Dashboard',
+                '/transportation': 'Transportation',
+                '/career-guidance': 'Career Guidance',
+                '/jobs-map': 'Jobs Map',
+                '/settings': 'Settings',
+                '/recruiter': 'Employer Dashboard',
+                '/profile': 'My Profile'
+            };
+
+            if (pageTitle && titles[path]) {
+                pageTitle.textContent = titles[path];
+            }
+        });
+
+        function activateTab(tabId) {
+            setTimeout(() => {
+                const el = document.getElementById(tabId);
+                if (el) {
+                    const tab = new bootstrap.Tab(document.querySelector(`[href="#${tabId}"]`) || document.querySelector(`[data-bs-target="#${tabId}"]`));
+                    if (tab) tab.show();
+                }
+            }, 300);
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function (event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+
+            if (window.innerWidth <= 991 &&
+                !sidebar.contains(event.target) &&
+                !mobileMenuBtn.contains(event.target) &&
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

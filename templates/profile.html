@@ -1,0 +1,143 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Profile - RAFEEQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <h2 class="fw-800 mb-1" style="letter-spacing: -1px;">User <span style="color: var(--primary);">Profile</span></h2>
+            <p class="text-muted mb-0">Manage your personal information and preferences</p>
+        </div>
+        <a href="{{ url_for('settings') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2" style="background: var(--gradient-primary); border: none;">
+            <i class="fas fa-edit"></i> Edit Profile
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile Header/Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-soft rounded-4 overflow-hidden h-100" style="background: var(--white); border: 1px solid var(--glass-border) !important;">
+                <div class="card-body text-center p-5">
+                    <div class="position-relative d-inline-block mb-4">
+                        <div class="p-2 bg-white rounded-circle shadow-soft" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; border: 4px solid #f8f9fa;">
+                            <i class="fas fa-user-circle" style="font-size: 110px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                        </div>
+                        <span class="position-absolute bottom-0 end-0 bg-success border border-white border-4 rounded-circle p-3 shadow-sm" title="Online Status"></span>
+                    </div>
+                    <h3 class="fw-800 mb-1">{{ session.get('full_name', 'User') }}</h3>
+                    <p class="text-muted mb-4">@{{ session.get('username', 'username') }}</p>
+                    
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                        <span class="badge px-3 py-2 rounded-pill d-flex align-items-center gap-2" style="background: rgba(20, 184, 166, 0.1); color: var(--primary); font-weight: 600;">
+                            <i class="fas fa-shield-alt"></i> {{ session.get('user_type', 'User').title() }}
+                        </span>
+                        {% if session.get('disability_type') %}
+                        <span class="badge px-3 py-2 rounded-pill d-flex align-items-center gap-2" style="background: rgba(13, 148, 136, 0.1); color: var(--secondary); font-weight: 600;">
+                            <i class="fas fa-universal-access"></i> Inclusive Profile
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-4 rounded-4 text-start mt-4" style="background: #f8f9fa; border-left: 4px solid var(--primary);">
+                        <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                            <i class="fas fa-universal-access" style="color: var(--primary);"></i> Workplace Needs
+                        </h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-white text-muted border rounded-pill px-3 py-2 fw-500">Remote Option</span>
+                            <span class="badge bg-white text-muted border rounded-pill px-3 py-2 fw-500">Flexible Hours</span>
+                            <span class="badge bg-white text-muted border rounded-pill px-3 py-2 fw-500">Screen Reader</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-soft rounded-4 mb-4 overflow-hidden" style="background: var(--white);">
+                <div class="card-header border-0 bg-transparent p-4 pb-0">
+                    <h5 class="fw-800 mb-0 d-flex align-items-center">
+                        <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(20, 184, 166, 0.1); width: 40px; height: 40px;">
+                            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+                        </span>
+                        Account Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 border" style="background: #ffffff; transition: var(--transition);">
+                                <label class="form-label text-muted small fw-800 text-uppercase mb-2">Full Name</label>
+                                <div class="h6 fw-600 mb-0 text-dark">
+                                    {{ session.get('full_name', 'Not set') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 border" style="background: #ffffff; transition: var(--transition);">
+                                <label class="form-label text-muted small fw-800 text-uppercase mb-2">Username</label>
+                                <div class="h6 fw-600 mb-0 text-dark">
+                                    {{ session.get('username', 'Not set') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 border" style="background: #ffffff; transition: var(--transition);">
+                                <label class="form-label text-muted small fw-800 text-uppercase mb-2">Account Type</label>
+                                <div class="h6 fw-600 mb-0 text-dark">
+                                    {{ session.get('user_type', '').title() }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 border" style="background: #ffffff; transition: var(--transition);">
+                                <label class="form-label text-muted small fw-800 text-uppercase mb-2">Member Since</label>
+                                <div class="h6 fw-600 mb-0 text-dark">
+                                    2025
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Summary -->
+            <div class="card border-0 shadow-soft rounded-4 overflow-hidden" style="background: var(--white);">
+                <div class="card-header border-0 bg-transparent p-4 pb-0">
+                    <h5 class="fw-800 mb-0 d-flex align-items-center">
+                        <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(13, 148, 136, 0.1); width: 40px; height: 40px;">
+                            <i class="fas fa-chart-line" style="color: var(--secondary);"></i>
+                        </span>
+                        RAFEEQ Activity
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-4 rounded-4 text-center border-0 h-100" style="background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(13, 148, 136, 0.05) 100%); transition: var(--transition);">
+                                <div class="h2 fw-800 mb-1" style="color: var(--primary);">12</div>
+                                <p class="text-muted small mb-0 fw-600">Jobs Viewed</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-4 rounded-4 text-center border-0 h-100" style="background: linear-gradient(135deg, rgba(46, 213, 115, 0.05) 0%, rgba(46, 213, 115, 0.1) 100%); transition: var(--transition);">
+                                <div class="h2 fw-800 mb-1" style="color: #2ed573;">5</div>
+                                <p class="text-muted small mb-0 fw-600">Matches Found</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-4 rounded-4 text-center border-0 h-100" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.1) 100%); transition: var(--transition);">
+                                <div class="h2 fw-800 mb-1" style="color: #3498db;">2</div>
+                                <p class="text-muted small mb-0 fw-600">Resumes Created</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

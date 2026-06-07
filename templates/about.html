@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}RAFEEQ - About Us{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-section {
+        padding: 150px 0 100px;
+        background: #fdfdfd;
+        min-height: 100vh;
+    }
+    
+    .about-header {
+        margin-bottom: 60px;
+        text-align: center;
+    }
+    
+    .about-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #40189d;
+        margin-bottom: 20px;
+    }
+    
+    .about-content {
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.8;
+        font-size: 1.1rem;
+        color: #555;
+    }
+    
+    .feature-list {
+        margin-top: 40px;
+        list-style: none;
+        padding: 0;
+    }
+    
+    .feature-list li {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .feature-list i {
+        color: #5e17eb;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <div class="container">
+        <div class="about-header">
+            <h1>About RAFEEQ</h1>
+            <p class="lead">Empowering people with physical disabilities in their professional journey.</p>
+        </div>
+        
+        <div class="about-content">
+            <p>
+                RAFEEQ is a specialized electronic platform dedicated to supporting and empowering people with physical disabilities to find job opportunities that match their abilities and needs. 
+            </p>
+            <p>
+                Using smart tools based on artificial intelligence, we help our users create professional resumes, recommend the best job matches, and improve the overall employment experience for both individuals and companies.
+            </p>
+            
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> AI-powered Resume Building</li>
+                <li><i class="fas fa-check-circle"></i> Accessible Transportation Services</li>
+                <li><i class="fas fa-check-circle"></i> Smart Job Matching based on Accessibility</li>
+                <li><i class="fas fa-check-circle"></i> Career Guidance and Mentorship</li>
+            </ul>
+            
+            <div class="mt-5 text-center">
+                <a href="/register" class="btn btn-primary btn-lg rounded-pill px-5" style="background: #40189d; border: none;">Join Us Today</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

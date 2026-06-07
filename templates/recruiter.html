@@ -1,0 +1,781 @@
+{% extends "base.html" %}
+
+{% block title %}Employer Dashboard - RAFEEQ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: var(--white);
+        border-radius: var(--border-radius-md);
+        padding: 28px;
+        border: 1px solid #e2e8f0;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 5px; height: 100%;
+        background: var(--gradient-primary);
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .stat-icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; color: white;
+        background: var(--gradient-primary);
+        margin-bottom: 1rem;
+    }
+
+    /* Tabs */
+    .employer-tabs .nav-link {
+        border-radius: 14px;
+        padding: 14px 28px;
+        font-weight: 700;
+        color: #6c757d;
+        background: white;
+        border: 1.5px solid #e2e8f0;
+        transition: var(--transition);
+        display: flex; align-items: center; gap: 8px;
+    }
+    .employer-tabs .nav-link:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    .employer-tabs .nav-link.active {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+        border-color: transparent;
+        box-shadow: 0 8px 20px rgba(20,184,166,0.25);
+    }
+
+    /* Search Form */
+    .search-panel {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }
+    .search-panel .form-control,
+    .search-panel .form-select {
+        border-radius: 12px;
+        border: 1.5px solid #e2e8f0;
+        padding: 12px 16px;
+        font-weight: 500;
+        transition: var(--transition);
+        background: #f8fafc;
+    }
+    .search-panel .form-control:focus,
+    .search-panel .form-select:focus {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(20,184,166,0.1);
+    }
+
+    /* Candidate Cards */
+    .candidate-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 28px;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .candidate-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 5px; height: 100%;
+        background: var(--gradient-primary);
+    }
+    .candidate-card:hover {
+        transform: translateX(6px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+    }
+
+    .match-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: white;
+        background: var(--gradient-primary);
+        box-shadow: 0 4px 12px rgba(20,184,166,0.3);
+    }
+    .match-badge.excellent { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+    .match-badge.good { background: var(--gradient-primary); }
+    .match-badge.fair { background: linear-gradient(135deg,#f59e0b,#d97706); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+    .ai-tag {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg,#6366f1,#a855f7);
+        color: white;
+    }
+    .db-tag {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg,#0ea5e9,#0284c7);
+        color: white;
+    }
+
+    .skill-chip {
+        padding: 5px 14px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+        display: inline-block;
+        margin: 3px 2px;
+    }
+
+    .candidate-avatar {
+        width: 58px; height: 58px;
+        border-radius: 16px;
+        background: var(--gradient-primary);
+        display: flex; align-items: center; justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .info-row {
+        display: flex; align-items: center; gap: 6px;
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    .info-row i { color: var(--primary-color); width: 16px; }
+
+    .download-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        text-decoration: none;
+        transition: var(--transition);
+        box-shadow: 0 4px 12px rgba(20,184,166,0.25);
+    }
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(20,184,166,0.35);
+        color: white;
+    }
+    .download-btn-disabled {
+        background: #e2e8f0;
+        color: #94a3b8;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    /* Section divider */
+    .results-section-label {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 16px;
+        margin-top: 8px;
+    }
+    .results-section-label span {
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        white-space: nowrap;
+    }
+    .results-section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    /* Post Job Form */
+    .post-job-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 40px;
+        border: 1px solid #e2e8f0;
+        box-shadow: var(--shadow-sm);
+    }
+    .post-job-card .form-control,
+    .post-job-card .form-select {
+        border-radius: 12px;
+        border: 1.5px solid #e2e8f0;
+        padding: 12px 16px;
+        background: #f8fafc;
+        transition: var(--transition);
+    }
+    .post-job-card .form-control:focus { border-color: var(--primary-color); background: white; box-shadow: 0 0 0 3px rgba(20,184,166,0.1); }
+
+    .acc-checkbox {
+        padding: 16px 20px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .acc-checkbox:hover { border-color: var(--primary-color); background: rgba(20,184,166,0.03); }
+    .acc-checkbox input:checked + .acc-checkbox { border-color: var(--primary-color); }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+    .empty-state i { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.3; display: block; }
+
+    /* Loading */
+    .search-loading {
+        text-align: center;
+        padding: 50px;
+    }
+
+    /* Score breakdown */
+    .score-bar-wrap { margin-top: 8px; }
+    .score-bar-bg { background: #e2e8f0; border-radius: 10px; height: 6px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 10px; background: var(--gradient-primary); transition: width 0.8s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <h2 class="fw-800 mb-1" style="font-size:2rem; letter-spacing:-0.5px;">
+                Employer <span style="background: var(--gradient-primary); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Dashboard</span>
+            </h2>
+            <p class="text-muted fw-500 mb-0">Welcome, {{ session.get('full_name', session.get('username')) }}! Build a diverse, inclusive workforce.</p>
+        </div>
+        <span class="badge px-4 py-3 rounded-pill fw-700 d-flex align-items-center gap-2"
+            style="background: rgba(20,184,166,0.1); color:#0d9488; border:1.5px solid rgba(20,184,166,0.25); font-size:0.88rem;">
+            <i class="fas fa-certificate"></i> RAFEEQ Certified Employer
+        </span>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                <p class="text-muted small fw-700 text-uppercase mb-1">Active Posts</p>
+                <h2 class="fw-800 mb-0">12</h2>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);"><i class="fas fa-users"></i></div>
+                <p class="text-muted small fw-700 text-uppercase mb-1">Total Applicants</p>
+                <h2 class="fw-800 mb-0">148</h2>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-star"></i></div>
+                <p class="text-muted small fw-700 text-uppercase mb-1">Inclusion Score</p>
+                <h2 class="fw-800 mb-0" style="color:var(--primary-color);">94%</h2>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-handshake"></i></div>
+                <p class="text-muted small fw-700 text-uppercase mb-1">Hired via RAFEEQ</p>
+                <h2 class="fw-800 mb-0">8</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav employer-tabs gap-3 mb-5 flex-wrap" id="employerTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-find" type="button">
+                <i class="fas fa-search"></i> Find Candidates
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-post" type="button">
+                <i class="fas fa-plus-circle"></i> Post a Job
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-profile" type="button">
+                <i class="fas fa-building"></i> Company Profile
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="employerTabContent">
+
+        <!-- ===================== TAB 1: FIND CANDIDATES ===================== -->
+        <div class="tab-pane fade show active" id="tab-find">
+            <div class="row g-4">
+
+                <!-- Search Panel -->
+                <div class="col-lg-4">
+                    <div class="search-panel">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <div style="width:42px;height:42px;background:var(--gradient-primary);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-robot text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-800 mb-0">AI Talent Finder</h5>
+                                <small class="text-muted">Powered by RAFEEQ AI</small>
+                            </div>
+                        </div>
+
+                        <form id="candidateSearchForm">
+                            <div class="mb-3">
+                                <label class="form-label fw-700 small text-uppercase text-muted">Job Title / Role</label>
+                                <input type="text" id="jobTitle" class="form-control" placeholder="e.g. Software Engineer, Data Analyst...">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-700 small text-uppercase text-muted">Job Description & Requirements</label>
+                                <textarea id="jobDescription" class="form-control" rows="8"
+                                    placeholder="Describe the role, required skills, experience level, key responsibilities, and any special requirements..."></textarea>
+                                <small class="text-muted mt-1 d-block">The more detail you provide, the better the AI match.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-700 small text-uppercase text-muted d-flex justify-content-between">
+                                    Number of Results
+                                    <span class="text-primary fw-800" id="numLabel">5</span>
+                                </label>
+                                <input type="range" class="form-range" id="numResults" min="1" max="10" value="5"
+                                    oninput="document.getElementById('numLabel').textContent=this.value">
+                            </div>
+
+                            <div class="mb-4 p-3 rounded-3" style="background:#f0fdfa;border:1px solid rgba(20,184,166,0.2);">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="includeDB" checked>
+                                    <label class="form-check-label fw-600 small" for="includeDB">
+                                        <i class="fas fa-database text-primary me-1"></i> Search resume database
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="includeAI" checked>
+                                    <label class="form-check-label fw-600 small" for="includeAI">
+                                        <i class="fas fa-robot text-warning me-1"></i> Generate AI candidate profiles
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn w-100 py-3 fw-700" id="searchBtn"
+                                style="background:var(--gradient-primary);color:white;border:none;border-radius:14px;font-size:1rem;box-shadow:0 6px 20px rgba(20,184,166,0.3);">
+                                <i class="fas fa-bolt me-2"></i> Find Best Matches
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="col-lg-8">
+                    <div id="searchLoading" class="search-loading d-none">
+                        <div class="spinner-border mb-3" style="width:3rem;height:3rem;color:var(--primary-color);" role="status"></div>
+                        <h5 class="fw-700 text-muted">Analyzing candidates with AI...</h5>
+                        <p class="text-muted small">Matching skills, experience, and compatibility</p>
+                    </div>
+
+                    <div id="searchResults">
+                        <div class="empty-state">
+                            <i class="fas fa-user-friends"></i>
+                            <h5 class="fw-700 mb-2">Ready to Find Talent</h5>
+                            <p class="small">Enter a job title and description, then click <strong>Find Best Matches</strong> to discover suitable candidates from our database and AI-generated profiles.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== TAB 2: POST A JOB ===================== -->
+        <div class="tab-pane fade" id="tab-post">
+            <div class="post-job-card">
+                <div class="mb-5">
+                    <h4 class="fw-800 mb-1" style="font-size:1.6rem;">Post an <span style="color:var(--primary-color);">Opportunity</span></h4>
+                    <p class="text-muted fw-500">Create an inclusive job listing that attracts top diverse talent.</p>
+                </div>
+                <form id="postJobForm">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Job Title *</label>
+                            <input type="text" class="form-control" id="pj_title" placeholder="e.g. Senior Data Analyst" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Location</label>
+                            <input type="text" class="form-control" id="pj_location" placeholder="e.g. Riyadh, KSA">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Salary Range</label>
+                            <input type="text" class="form-control" id="pj_salary" placeholder="e.g. 15,000 - 20,000 SAR">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Work Type</label>
+                            <select class="form-select" id="pj_type">
+                                <option value="onsite">On-Site</option>
+                                <option value="remote">Remote</option>
+                                <option value="hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Full Job Description *</label>
+                            <textarea class="form-control" id="pj_desc" rows="6" placeholder="Describe the role, responsibilities, team culture, and required qualifications..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-700 small text-uppercase text-muted">Required Skills</label>
+                            <input type="text" class="form-control" id="pj_skills" placeholder="e.g. Python, Excel, Communication, Project Management...">
+                        </div>
+                        <div class="col-12">
+                            <h5 class="fw-800 mt-2 mb-4 d-flex align-items-center gap-2">
+                                <i class="fas fa-universal-access" style="color:var(--primary-color);"></i>
+                                Accessibility & Inclusion Features
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_remote">
+                                        <div>
+                                            <div class="fw-700 small">Remote Available</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Full or partial remote work</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_wheelchair">
+                                        <div>
+                                            <div class="fw-700 small">Accessible Office</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Ramps, lifts, wide corridors</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_hours">
+                                        <div>
+                                            <div class="fw-700 small">Flexible Hours</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Adjustable start/end times</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_equip">
+                                        <div>
+                                            <div class="fw-700 small">Assistive Equipment</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Special tools provided</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_transport">
+                                        <div>
+                                            <div class="fw-700 small">Accessible Transport</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Transport support available</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="acc-checkbox w-100">
+                                        <input class="form-check-input" type="checkbox" id="acc_certified">
+                                        <div>
+                                            <div class="fw-700 small">Disability-Friendly</div>
+                                            <div class="text-muted" style="font-size:0.78rem;">Certified inclusive employer</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                            <button type="button" class="btn btn-light rounded-pill px-5 py-3 fw-700 border">Save Draft</button>
+                            <button type="submit" class="btn rounded-pill px-5 py-3 fw-700"
+                                style="background:var(--gradient-primary);color:white;box-shadow:0 6px 20px rgba(20,184,166,0.3);">
+                                <i class="fas fa-paper-plane me-2"></i> Publish Job Post
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===================== TAB 3: COMPANY PROFILE ===================== -->
+        <div class="tab-pane fade" id="tab-profile">
+            <div class="post-job-card">
+                <div class="d-flex justify-content-between align-items-start mb-5 flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-800 mb-1">Accessibility <span style="color:var(--primary-color);">Scorecard</span></h4>
+                        <p class="text-muted fw-500 mb-0">How your organization supports employees with diverse needs.</p>
+                    </div>
+                    <button class="btn rounded-pill px-4 py-2 fw-700"
+                        style="border:1.5px solid var(--primary-color);color:var(--primary-color);">
+                        <i class="fas fa-edit me-2"></i>Update Profile
+                    </button>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 border h-100" style="background:#f8fafc;">
+                            <h5 class="fw-800 mb-4 d-flex align-items-center gap-2">
+                                <i class="fas fa-hotel" style="color:var(--primary-color);"></i> Facility Features
+                            </h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Ramp Access at all entries
+                                </li>
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Wide Hallways (Wheelchair Friendly)
+                                </li>
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Accessible Restrooms on every floor
+                                </li>
+                                <li class="d-flex align-items-center gap-3 fw-600 opacity-50">
+                                    <i class="fas fa-times-circle text-danger fs-5"></i> Automatic Doors (Main entry only)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 rounded-4 border h-100" style="background:#f8fafc;">
+                            <h5 class="fw-800 mb-4 d-flex align-items-center gap-2">
+                                <i class="fas fa-heart" style="color:var(--primary-color);"></i> Supportive Culture
+                            </h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Disability Sensitivity Training
+                                </li>
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Dedicated Inclusion Mentor
+                                </li>
+                                <li class="d-flex align-items-center gap-3 fw-600">
+                                    <i class="fas fa-check-circle text-success fs-5"></i> Flexible Medical Policy
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /tab-content -->
+</div>
+
+<script>
+// ===================== CANDIDATE SEARCH =====================
+document.getElementById('candidateSearchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const title = document.getElementById('jobTitle').value.trim();
+    const desc  = document.getElementById('jobDescription').value.trim();
+    const num   = parseInt(document.getElementById('numResults').value);
+    const useDB = document.getElementById('includeDB').checked;
+    const useAI = document.getElementById('includeAI').checked;
+
+    const fullJD = [title, desc].filter(Boolean).join('\n\n');
+    if (fullJD.length < 15) {
+        alert('Please enter a job title or a description first.');
+        return;
+    }
+
+    const btn = document.getElementById('searchBtn');
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Searching...';
+    btn.disabled = true;
+
+    document.getElementById('searchLoading').classList.remove('d-none');
+    document.getElementById('searchResults').innerHTML = '';
+
+    let dbCandidates = [];
+    let aiCandidates = [];
+
+    if (useDB) {
+        try {
+            const fd = new FormData();
+            fd.append('job_description', fullJD);
+            fd.append('num_candidates', num);
+            const r = await fetch('/api/recommend-candidates', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success && d.recommendations) dbCandidates = d.recommendations;
+        } catch(err) { console.warn('DB search error', err); }
+    }
+
+    if (useAI) {
+        try {
+            const fd = new FormData();
+            fd.append('job_description', fullJD);
+            fd.append('num_candidates', Math.min(num, 5));
+            const r = await fetch('/api/generate-candidates', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success && d.generated_candidates) aiCandidates = d.generated_candidates;
+        } catch(err) { console.warn('AI gen error', err); }
+    }
+
+    document.getElementById('searchLoading').classList.add('d-none');
+    renderResults(dbCandidates, aiCandidates, title || 'the role');
+
+    btn.innerHTML = '<i class="fas fa-bolt me-2"></i> Find Best Matches';
+    btn.disabled = false;
+});
+
+function renderResults(db, ai, jobTitle) {
+    const container = document.getElementById('searchResults');
+
+    if (!db.length && !ai.length) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-user-slash"></i>
+                <h5 class="fw-700 mb-2">No Candidates Found</h5>
+                <p class="small">Try a broader description, or enable AI generation to get profile suggestions.</p>
+            </div>`;
+        return;
+    }
+
+    let html = '';
+
+    if (db.length) {
+        html += `
+        <div class="results-section-label">
+            <span><i class="fas fa-database me-2" style="color:#0ea5e9;"></i>Database Results (${db.length})</span>
+        </div>`;
+        db.forEach(c => { html += buildCard(c, false, jobTitle); });
+    }
+
+    if (ai.length) {
+        html += `
+        <div class="results-section-label" style="margin-top:28px;">
+            <span><i class="fas fa-robot me-2" style="color:#a855f7;"></i>AI-Generated Profiles (${ai.length})</span>
+        </div>`;
+        ai.forEach(c => { html += buildCard(c, true, jobTitle); });
+    }
+
+    container.innerHTML = html;
+}
+
+function buildCard(c, isAI, jobTitle) {
+    const name      = c.name || 'Candidate';
+    const email     = c.email || '';
+    const phone     = c.phone || '';
+    const skills    = c.skills || '';
+    const exp       = c.experience || '';
+    const edu       = c.education || '';
+    const summary   = c.summary || '';
+    const resumeId  = c.resume_id || c.candidate_id || '';
+
+    const rawScore  = c.match_score != null ? c.match_score : (isAI ? 0.95 : 0.80);
+    const scorePct  = Math.round(rawScore * 100);
+    const scoreClass = scorePct >= 90 ? 'excellent' : scorePct >= 75 ? 'good' : 'fair';
+    const scoreLabel = scorePct >= 90 ? 'Excellent Fit' : scorePct >= 75 ? 'Good Match' : 'Potential Match';
+
+    const initials = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+    const skillChips = skills
+        ? skills.split(',').slice(0,6).map(s => `<span class="skill-chip">${s.trim()}</span>`).join('')
+        : '<span class="text-muted small">No skills listed</span>';
+
+    const sourceTag = isAI
+        ? `<span class="ai-tag"><i class="fas fa-robot"></i> AI Generated</span>`
+        : `<span class="db-tag"><i class="fas fa-database"></i> Database</span>`;
+
+    let downloadSection = '';
+    if (resumeId) {
+        downloadSection = `<a href="/api/download-resume/${resumeId}" class="download-btn" download>
+            <i class="fas fa-download"></i> Download CV
+        </a>`;
+    } else {
+        downloadSection = `<span class="download-btn download-btn-disabled">
+            <i class="fas fa-ban"></i> No File
+        </span>`;
+    }
+
+    return `
+    <div class="candidate-card">
+        <div class="d-flex gap-4 align-items-start flex-wrap">
+            <!-- Avatar -->
+            <div class="candidate-avatar">${initials}</div>
+
+            <!-- Main Info -->
+            <div class="flex-grow-1 min-width-0">
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <h4 class="fw-800 mb-0">${name}</h4>
+                    ${sourceTag}
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mb-3">
+                    ${exp ? `<div class="info-row"><i class="fas fa-briefcase"></i>${exp}</div>` : ''}
+                    ${edu ? `<div class="info-row"><i class="fas fa-graduation-cap"></i>${edu}</div>` : ''}
+                    ${email ? `<div class="info-row"><i class="fas fa-envelope"></i>${email}</div>` : ''}
+                    ${phone ? `<div class="info-row"><i class="fas fa-phone"></i>${phone}</div>` : ''}
+                </div>
+
+                ${summary ? `<p class="text-muted small mb-3" style="line-height:1.6;max-width:640px;">${summary.substring(0,200)}${summary.length>200?'...':''}</p>` : ''}
+
+                <div class="mb-1">
+                    <small class="fw-700 text-muted text-uppercase" style="font-size:0.72rem;letter-spacing:0.5px;">Skills</small>
+                    <div class="mt-1">${skillChips}</div>
+                </div>
+            </div>
+
+            <!-- Score & Download -->
+            <div class="text-center" style="min-width:130px;">
+                <div class="match-badge ${scoreClass} mb-1">
+                    <i class="fas fa-chart-line"></i> ${scorePct}%
+                </div>
+                <p class="small text-muted fw-600 mb-3">${scoreLabel}</p>
+                <div class="score-bar-wrap mb-4">
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" style="width:${scorePct}%;"></div>
+                    </div>
+                </div>
+                ${downloadSection}
+            </div>
+        </div>
+    </div>`;
+}
+
+// ===================== POST JOB =====================
+document.getElementById('postJobForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('[type=submit]');
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Publishing...';
+    btn.disabled = true;
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i> Published!';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Publish Job Post';
+            btn.disabled = false;
+        }, 2500);
+    }, 1200);
+});
+</script>
+{% endblock %}

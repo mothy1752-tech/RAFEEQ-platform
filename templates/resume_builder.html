@@ -1,0 +1,928 @@
+{% extends "base.html" %}
+
+{% block title %}AI Resume Builder - RAFEEQ{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Premium Page Entry Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    /* Builder Cards */
+    .builder-glass-card {
+        background: var(--white);
+        border-radius: 24px;
+        padding: 40px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+        /* Slightly enhanced light shadow */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .builder-glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        border-color: rgba(20, 184, 166, 0.1);
+    }
+
+    .section-premium-title {
+        color: var(--dark-color);
+        font-weight: 800;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 1.3rem;
+    }
+
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        box-shadow: 0 8px 20px rgba(20, 184, 166, 0.25);
+    }
+
+    /* Input Styling */
+    .form-control-premium {
+        border-radius: 16px;
+        padding: 14px 20px;
+        border: 2px solid #f1f5f9;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .form-control-premium:focus {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    }
+
+    .form-label {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #64748b;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    /* Preview Paper Effect */
+    .preview-glass-pane {
+        background: white;
+        border-radius: 4px;
+        /* Sharp corners like paper */
+        padding: 50px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05), 0 20px 40px rgba(0, 0, 0, 0.1);
+        /* Floating paper shadow */
+        position: sticky;
+        top: 40px;
+        min-height: 842px;
+        /* A4 Ratio */
+        border: 1px solid #e2e8f0;
+        transform: rotate(0.5deg);
+        /* Slight natural tilt */
+        transition: transform 0.3s ease;
+    }
+
+    .preview-glass-pane:hover {
+        transform: rotate(0deg) scale(1.005);
+    }
+
+    /* Watermark Effect */
+    .preview-glass-pane::before {
+        content: "RAFEEQ PREVIEW";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 4rem;
+        font-weight: 900;
+        color: rgba(0, 0, 0, 0.02);
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    /* Skills Meter */
+    .skill-meter-container {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        margin-top: 15px;
+        overflow: hidden;
+    }
+
+    .skill-meter-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        width: 0%;
+        transition: width 1s ease-out;
+        border-radius: 10px;
+    }
+
+    /* AI Badge */
+    .ai-badge {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3);
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .col-lg-6:first-child {
+            display: none !important;
+        }
+
+        .preview-glass-pane {
+            box-shadow: none !important;
+            border: none !important;
+            transform: none !important;
+            padding: 20mm 22mm !important;
+            min-height: auto !important;
+            border-radius: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .preview-glass-pane::before {
+            display: none !important;
+        }
+
+        body, html {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .container-fluid, .row, .col-lg-6 {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row align-items-center mb-5 no-print animate-up">
+        <div class="col-md-7">
+            <div class="d-flex align-items-center mb-2">
+                <span class="ai-badge me-3"><i class="fas fa-robot"></i> AI Powered</span>
+                <small class="text-muted fw-bold">v2.0 Beta</small>
+            </div>
+            <h1 class="display-5 fw-800 mb-2" style="color: var(--dark-color);">Resume Builder</h1>
+            <p class="text-muted lead fw-500">Create a professional, ATS-friendly resume tailored for inclusive
+                employment.</p>
+        </div>
+        <div class="col-md-5 text-md-end">
+            <div class="d-flex justify-content-end gap-3">
+                <div class="text-end me-3">
+                    <small class="d-block fw-bold text-dark">Profile Strength</small>
+                    <div class="skill-meter-container" style="width: 150px;">
+                        <div class="skill-meter-fill" id="strengthMeter" style="width: 30%;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-outline-dark rounded-pill fw-bold" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i> Print / PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Editor Side -->
+        <div class="col-lg-6 no-print animate-up delay-1">
+            <!-- AI Suggestion Box -->
+            <div class="alert alert-primary border-0 shadow-sm rounded-4 p-4 mb-4"
+                style="background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);">
+                <div class="d-flex gap-3">
+                    <div class="p-2 bg-white rounded-circle text-primary shadow-sm" style="height: fit-content;">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">AI Suggestion</h6>
+                        <p class="small text-muted mb-0 lh-sm">"Adding numerical results (e.g., 'Improved efficiency by
+                            20%') significantly boosts your chances. Try it in the Experience section!"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TEMPLATES SECTION ========== -->
+            <div class="builder-glass-card" style="background:linear-gradient(135deg,#f0fdfa,#f5f3ff);">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper" style="background:linear-gradient(135deg,#6366f1,#a855f7);"><i class="fas fa-magic"></i></div>
+                    Quick-Start Templates
+                </h4>
+                <p class="text-muted small mb-4">Choose a template to auto-fill sections with professional content — then customize to your own story.</p>
+
+                <!-- Category Tabs -->
+                <div class="d-flex flex-wrap gap-2 mb-4" id="templateCats">
+                    <button class="btn btn-sm rounded-pill fw-700 active-cat" onclick="showCat('tech',this)"
+                        style="background:var(--gradient-primary);color:white;border:none;">Tech</button>
+                    <button class="btn btn-sm rounded-pill fw-700 border cat-btn" onclick="showCat('business',this)">Business</button>
+                    <button class="btn btn-sm rounded-pill fw-700 border cat-btn" onclick="showCat('healthcare',this)">Healthcare</button>
+                    <button class="btn btn-sm rounded-pill fw-700 border cat-btn" onclick="showCat('education',this)">Education</button>
+                    <button class="btn btn-sm rounded-pill fw-700 border cat-btn" onclick="showCat('creative',this)">Creative</button>
+                </div>
+
+                <div id="templateGrid" class="row g-3"></div>
+            </div>
+
+            <!-- Personal Details -->
+            <div class="builder-glass-card">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper"><i class="fas fa-user"></i></div>
+                    Personal Info
+                </h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control form-control-premium" id="phone"
+                            placeholder="+966 5X XXX XXXX">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control form-control-premium" id="location"
+                            placeholder="City, Region">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Professional Summary</label>
+                        <textarea class="form-control form-control-premium" id="summary" rows="4"
+                            placeholder="Briefly describe your professional background..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="builder-glass-card">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper"><i class="fas fa-briefcase"></i></div>
+                    Experience
+                </h4>
+                <div id="workContainer"></div>
+                <button class="btn btn-light w-100 py-3 rounded-4 border-dashed fw-bold text-primary mt-3"
+                    onclick="addWork()" style="border: 2px dashed rgba(20, 184, 166, 0.3);">
+                    <i class="fas fa-plus me-2"></i> Add Position
+                </button>
+            </div>
+
+            <!-- Skills -->
+            <div class="builder-glass-card">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper"><i class="fas fa-layer-group"></i></div>
+                    Skills
+                </h4>
+                <div class="bg-light p-3 rounded-4 mb-3">
+                    <small class="text-muted fw-bold d-block mb-2">Popular Tags:</small>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-white text-dark border shadow-sm cursor-pointer"
+                            onclick="addSkillTag('Project Management')">+ Project Mgmt</span>
+                        <span class="badge bg-white text-dark border shadow-sm cursor-pointer"
+                            onclick="addSkillTag('Communication')">+ Communication</span>
+                        <span class="badge bg-white text-dark border shadow-sm cursor-pointer"
+                            onclick="addSkillTag('Data Analysis')">+ Data Analysis</span>
+                    </div>
+                </div>
+                <input type="text" class="form-control form-control-premium" id="skillsInput"
+                    placeholder="Type skills separated by commas..." oninput="updateSkills()">
+            </div>
+
+            <!-- Accessibility -->
+            <div class="builder-glass-card border-start border-5 border-info">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper bg-gradient-info text-white"
+                        style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);"><i
+                            class="fas fa-universal-access"></i></div>
+                    Accommodations
+                </h4>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="showAccessibility">
+                    <label class="form-check-label fw-bold small text-muted" for="showAccessibility">Show on
+                        Resume</label>
+                </div>
+                <textarea class="form-control form-control-premium" id="accessNeeds" rows="3"
+                    placeholder="Describe workplace accommodations that enable your success..."></textarea>
+            </div>
+
+            <!-- Education -->
+            <div class="builder-glass-card">
+                <h4 class="section-premium-title">
+                    <div class="icon-wrapper"><i class="fas fa-graduation-cap"></i></div>
+                    Education
+                </h4>
+                <div id="eduContainer"></div>
+                <button class="btn btn-light w-100 py-3 rounded-4 border-dashed fw-bold text-primary mt-3"
+                    onclick="addEdu()" style="border: 2px dashed rgba(20, 184, 166, 0.3);">
+                    <i class="fas fa-plus me-2"></i> Add Education
+                </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="row g-3 mb-5">
+                <div class="col-md-6">
+                    <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg" onclick="optimizeAI()">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-magic me-2"></i> Optimize with AI
+                        </div>
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-lg" id="downloadAtsBtn" onclick="downloadATS()">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-download me-2"></i> Download ATS PDF
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Side -->
+        <div class="col-lg-6 no-print animate-up delay-2">
+            <h6 class="text-center fw-bold text-muted mb-4 small text-uppercase ls-1">Live Preview (A4 Size)</h6>
+            <div class="preview-glass-pane" style="font-family: Arial, Helvetica, sans-serif; padding: 40px;">
+                <!-- Name Header -->
+                <div style="border-bottom: 1.5px solid #111; padding-bottom: 14px; margin-bottom: 16px;">
+                    <h1 id="p-name" style="font-size: 2rem; font-weight: 900; color: #111; margin: 0 0 4px 0; font-family: Arial, sans-serif;">{{ session.get('full_name') or session.get('username', 'Your Name Here') }}</h1>
+                    <div style="font-size: 0.88rem; color: #333;">
+                        <span id="p-phone">+966 -- --- ----</span>
+                        &nbsp;&middot;&nbsp;
+                        <span id="p-email">{{ session.get('email', 'email@example.com') }}</span>
+                        &nbsp;&middot;&nbsp;
+                        <span id="p-location">Location</span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="mb-4">
+                    <h6 style="font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 3px;">Professional Summary</h6>
+                    <p id="p-summary" style="line-height: 1.6; font-size: 0.88rem; color: #333; margin: 0;">Start typing professional summary to see it here...</p>
+                </div>
+
+                <!-- Key Competencies -->
+                <div class="mb-4">
+                    <h6 style="font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 3px;">Key Competencies</h6>
+                    <div id="p-skills" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 8px; font-size: 0.85rem; color: #333;"></div>
+                </div>
+
+                <!-- Experience -->
+                <div class="mb-4">
+                    <h6 style="font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 3px;">Professional Experience</h6>
+                    <div id="p-work-list">
+                        <p class="text-muted fst-italic small">No work experience added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Bottom 2-col: Education | Accommodations -->
+                <div style="border-top: 1px solid #111; padding-top: 12px; margin-top: 12px; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 16px;">
+                    <div>
+                        <h6 style="font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 8px;">Education &amp; Certifications</h6>
+                        <div id="p-edu-list">
+                            <p class="text-muted fst-italic small">No education added yet.</p>
+                        </div>
+                    </div>
+                    <div style="background: #ccc; width: 1px;"></div>
+                    <div id="p-access-section" class="d-none">
+                        <h6 style="font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #111; margin-bottom: 8px;">Workplace Accommodations</h6>
+                        <p id="p-access" style="font-size: 0.85rem; color: #333; line-height: 1.5; margin: 0;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Preview Logic
+    const inputs = ['phone', 'location', 'summary', 'accessNeeds'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+    });
+
+    document.getElementById('showAccessibility').addEventListener('change', updatePreview);
+
+    function updatePreview() {
+        document.getElementById('p-phone').textContent = document.getElementById('phone').value || '+966 -- --- ----';
+        document.getElementById('p-location').textContent = document.getElementById('location').value || 'Location';
+        document.getElementById('p-summary').textContent = document.getElementById('summary').value || 'Start typing professional summary...';
+
+        // Access Field
+        const accessText = document.getElementById('accessNeeds').value;
+        const showAccess = document.getElementById('showAccessibility').checked;
+        const accessDiv = document.getElementById('p-access-section');
+
+        if (showAccess && accessText) {
+            accessDiv.classList.remove('d-none');
+            document.getElementById('p-access').textContent = accessText;
+        } else {
+            accessDiv.classList.add('d-none');
+        }
+
+        updateHealthMeter();
+    }
+
+    // Work Experience Logic
+    let workCount = 0;
+    function addWork() {
+        workCount++;
+        const id = workCount;
+        const html = `
+            <div class="bg-light p-3 rounded-4 mb-3 position-relative fade-in" id="work-form-${id}">
+                <button class="btn btn-sm btn-white text-danger position-absolute top-0 end-0 m-2 shadow-sm rounded-circle" onclick="removeWork(${id})"><i class="fas fa-times"></i></button>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Job Title" oninput="updateWorkPreview(${id})" id="work-title-${id}">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Company" oninput="updateWorkPreview(${id})" id="work-company-${id}">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Start Date (e.g. Jan 2022)" oninput="updateWorkPreview(${id})" id="work-start-${id}">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="End Date (e.g. Present)" oninput="updateWorkPreview(${id})" id="work-end-${id}">
+                    </div>
+                    <div class="col-12 mt-2">
+                        <textarea class="form-control form-control-sm border-0" rows="2" placeholder="Achievements..." oninput="updateWorkPreview(${id})" id="work-desc-${id}"></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('workContainer').insertAdjacentHTML('beforeend', html);
+
+        // Add Preview Slot
+        const prevHtml = `
+            <div class="mb-3 fade-in" id="p-work-${id}">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <span class="fw-bold text-dark" id="p-work-company-${id}">Company</span>
+                    <span class="small text-muted fw-bold" id="p-work-date-${id}"></span>
+                </div>
+                <h6 class="fw-bold text-dark mb-1" id="p-work-title-${id}">Job Title</h6>
+                <p class="small text-muted mb-0" style="line-height: 1.5;" id="p-work-desc-${id}"></p>
+            </div>
+        `;
+        const list = document.getElementById('p-work-list');
+        if (list.innerText.includes('No work experience')) list.innerText = '';
+        list.insertAdjacentHTML('beforeend', prevHtml);
+    }
+
+    function removeWork(id) {
+        document.getElementById(`work-form-${id}`).remove();
+        document.getElementById(`p-work-${id}`).remove();
+        if (document.getElementById('p-work-list').children.length === 0) {
+            document.getElementById('p-work-list').innerHTML = '<p class="text-muted fst-italic small">No work experience added yet.</p>';
+        }
+    }
+
+    function updateWorkPreview(id) {
+        document.getElementById(`p-work-title-${id}`).textContent = document.getElementById(`work-title-${id}`).value || 'Job Title';
+        document.getElementById(`p-work-company-${id}`).textContent = document.getElementById(`work-company-${id}`).value || 'Company';
+        const start = document.getElementById(`work-start-${id}`)?.value || '';
+        const end = document.getElementById(`work-end-${id}`)?.value || '';
+        const dateEl = document.getElementById(`p-work-date-${id}`);
+        if (dateEl) dateEl.textContent = start && end ? `${start} - ${end}` : (start || end || '');
+        document.getElementById(`p-work-desc-${id}`).textContent = document.getElementById(`work-desc-${id}`).value;
+        updateHealthMeter();
+    }
+
+    // Skills Logic
+    function updateSkills() {
+        const skills = document.getElementById('skillsInput').value.split(',').filter(s => s.trim() !== '');
+        const container = document.getElementById('p-skills');
+        container.innerHTML = skills.map(s => `<span>${s.trim()}</span>`).join('');
+        updateHealthMeter();
+    }
+
+    function addSkillTag(skill) {
+        const input = document.getElementById('skillsInput');
+        if (input.value) input.value += `, ${skill}`;
+        else input.value = skill;
+        updateSkills();
+    }
+
+    // AI & Meter
+    function updateHealthMeter() {
+        let score = 10;
+        if (document.getElementById('summary').value.length > 20) score += 20;
+        if (document.getElementById('skillsInput').value.length > 5) score += 20;
+        if (document.getElementById('workContainer').children.length > 0) score += 30;
+        if (document.getElementById('location').value.length > 3) score += 10;
+        if (document.getElementById('showAccessibility').checked) score += 10;
+
+        document.getElementById('strengthMeter').style.width = `${Math.min(score, 100)}%`;
+
+        const fill = document.getElementById('strengthMeter');
+        if (score < 40) fill.className = 'skill-meter-fill bg-danger';
+        else if (score < 70) fill.className = 'skill-meter-fill bg-warning';
+        else fill.className = 'skill-meter-fill bg-success';
+    }
+
+    // Education Logic
+    let eduCount = 0;
+    function addEdu() {
+        eduCount++;
+        const id = eduCount;
+        const html = `
+            <div class="bg-light p-3 rounded-4 mb-3 position-relative" id="edu-form-${id}">
+                <button class="btn btn-sm btn-white text-danger position-absolute top-0 end-0 m-2 shadow-sm rounded-circle" onclick="removeEdu(${id})"><i class="fas fa-times"></i></button>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Degree / Qualification" oninput="updateEduPreview(${id})" id="edu-degree-${id}">
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Institution" oninput="updateEduPreview(${id})" id="edu-inst-${id}">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" class="form-control form-control-sm border-0" placeholder="Year (e.g. 2022)" oninput="updateEduPreview(${id})" id="edu-year-${id}">
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('eduContainer').insertAdjacentHTML('beforeend', html);
+        const prevHtml = `
+            <div class="mb-2" id="p-edu-${id}">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <span class="fw-bold text-dark small" id="p-edu-degree-${id}">Degree</span>
+                    <span class="small text-muted" id="p-edu-year-${id}"></span>
+                </div>
+                <span class="small text-muted" id="p-edu-inst-${id}"></span>
+            </div>
+        `;
+        const list = document.getElementById('p-edu-list');
+        if (list.querySelector('.fst-italic')) list.innerHTML = '';
+        list.insertAdjacentHTML('beforeend', prevHtml);
+    }
+
+    function removeEdu(id) {
+        document.getElementById(`edu-form-${id}`).remove();
+        document.getElementById(`p-edu-${id}`).remove();
+        if (document.getElementById('p-edu-list').children.length === 0) {
+            document.getElementById('p-edu-list').innerHTML = '<p class="text-muted fst-italic small">No education added yet.</p>';
+        }
+    }
+
+    function updateEduPreview(id) {
+        document.getElementById(`p-edu-degree-${id}`).textContent = document.getElementById(`edu-degree-${id}`).value || 'Degree';
+        document.getElementById(`p-edu-inst-${id}`).textContent = document.getElementById(`edu-inst-${id}`).value || '';
+        document.getElementById(`p-edu-year-${id}`).textContent = document.getElementById(`edu-year-${id}`).value || '';
+    }
+
+    function collectResumeData() {
+        const work = [];
+        document.querySelectorAll('[id^="work-form-"]').forEach(el => {
+            const id = el.id.replace('work-form-', '');
+            const start = document.getElementById(`work-start-${id}`)?.value || '';
+            const end = document.getElementById(`work-end-${id}`)?.value || '';
+            work.push({
+                title: document.getElementById(`work-title-${id}`)?.value || '',
+                company: document.getElementById(`work-company-${id}`)?.value || '',
+                desc: document.getElementById(`work-desc-${id}`)?.value || '',
+                dateRange: start && end ? `${start} - ${end}` : (start || end || '')
+            });
+        });
+
+        const education = [];
+        document.querySelectorAll('[id^="edu-form-"]').forEach(el => {
+            const id = el.id.replace('edu-form-', '');
+            education.push({
+                degree: document.getElementById(`edu-degree-${id}`)?.value || '',
+                institution: document.getElementById(`edu-inst-${id}`)?.value || '',
+                year: document.getElementById(`edu-year-${id}`)?.value || ''
+            });
+        });
+
+        return {
+            phone: document.getElementById('phone').value,
+            location: document.getElementById('location').value,
+            summary: document.getElementById('summary').value,
+            skills: document.getElementById('skillsInput').value,
+            work,
+            education,
+            showAccessibility: document.getElementById('showAccessibility').checked,
+            accessNeeds: document.getElementById('accessNeeds').value
+        };
+    }
+
+    async function downloadATS() {
+        const btn = document.getElementById('downloadAtsBtn');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<div class="d-flex align-items-center justify-content-center"><i class="fas fa-circle-notch fa-spin me-2"></i> Generating ATS PDF...</div>';
+        btn.disabled = true;
+
+        try {
+            const data = collectResumeData();
+            const response = await fetch('/api/generate-ats-resume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                alert('Error: ' + (err.error || 'Failed to generate PDF'));
+                return;
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const disposition = response.headers.get('Content-Disposition') || '';
+            const match = disposition.match(/filename="?([^"]+)"?/);
+            a.download = match ? match[1] : 'Resume_ATS.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+
+            btn.innerHTML = '<div class="d-flex align-items-center justify-content-center"><i class="fas fa-check me-2"></i> Downloaded!</div>';
+            setTimeout(() => { btn.innerHTML = originalHtml; btn.disabled = false; }, 2500);
+        } catch (err) {
+            alert('Download failed. Please try again.');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    }
+
+    // ========== TEMPLATE DATA ==========
+    const TEMPLATES = {
+        tech: [
+            {
+                icon: 'fas fa-code',
+                title: 'Software Developer',
+                summary: 'Passionate software developer with 3+ years of experience building scalable web and mobile applications. Proficient in Python, JavaScript, and modern frameworks. Committed to clean code, Agile practices, and continuous learning.',
+                skills: 'Python, JavaScript, React, Node.js, SQL, Git, REST APIs, Docker, Agile',
+                work: [
+                    { title: 'Junior Software Developer', company: 'TechCorp Ltd.', desc: 'Developed and maintained RESTful APIs serving 50,000+ daily users\nCollaborated with cross-functional teams in Agile sprints\nReduced page load time by 35% through performance optimizations' }
+                ],
+                education: [{ degree: 'B.Sc. Computer Science', institution: 'King Abdulaziz University', year: '2022' }]
+            },
+            {
+                icon: 'fas fa-database',
+                title: 'Data Analyst',
+                summary: 'Detail-oriented data analyst skilled in transforming complex datasets into actionable business insights. Experience with Python, Power BI, and SQL. Known for creating clear dashboards and communicating findings to non-technical stakeholders.',
+                skills: 'Python, SQL, Power BI, Excel, Tableau, Machine Learning, Statistics, Data Visualization',
+                work: [
+                    { title: 'Data Analyst', company: 'Insights Co.', desc: 'Built automated reporting dashboards reducing manual effort by 60%\nAnalyzed customer behavior data to drive a 15% revenue increase\nConducted A/B tests and presented results to senior leadership' }
+                ],
+                education: [{ degree: 'B.Sc. Statistics', institution: 'King Fahd University', year: '2021' }]
+            },
+            {
+                icon: 'fas fa-shield-alt',
+                title: 'IT Support Specialist',
+                summary: 'Dedicated IT support professional with a strong foundation in troubleshooting hardware, software, and network issues. Committed to delivering excellent user experiences and maintaining system reliability in fast-paced environments.',
+                skills: 'Windows, Linux, Networking, Active Directory, Office 365, Troubleshooting, Help Desk, ITIL',
+                work: [
+                    { title: 'IT Support Technician', company: 'NetSolutions', desc: 'Resolved 50+ support tickets per week with 95% satisfaction rating\nSet up and maintained network infrastructure for 200-user office\nDocumented procedures reducing onboarding time by 40%' }
+                ],
+                education: [{ degree: 'Diploma in Network Administration', institution: 'Technical College', year: '2020' }]
+            }
+        ],
+        business: [
+            {
+                icon: 'fas fa-chart-bar',
+                title: 'Project Manager',
+                summary: 'Results-driven project manager with 5+ years delivering complex cross-functional projects on time and within budget. PMP-certified with expertise in stakeholder management, risk mitigation, and Agile methodologies.',
+                skills: 'Project Management, MS Project, Agile, Scrum, Risk Management, Budgeting, Stakeholder Communication, Leadership',
+                work: [
+                    { title: 'Project Manager', company: 'BusinessEdge Consulting', desc: 'Led a $2M digital transformation project across 5 departments\nManaged a team of 12 with on-time delivery rate of 92%\nImplemented PMO standards that reduced project overruns by 25%' }
+                ],
+                education: [{ degree: 'MBA, Project Management', institution: 'Prince Mohammad University', year: '2019' }]
+            },
+            {
+                icon: 'fas fa-headset',
+                title: 'Customer Service Representative',
+                summary: 'Empathetic and solutions-focused customer service professional with 4 years of experience in fast-paced call centers and retail environments. Skilled in conflict resolution, CRM tools, and building lasting customer relationships.',
+                skills: 'CRM Software, Communication, Problem Solving, Active Listening, Arabic & English, Salesforce, Conflict Resolution',
+                work: [
+                    { title: 'Senior Customer Service Rep', company: 'ServiceFirst Co.', desc: 'Maintained a 98% customer satisfaction (CSAT) score for 18 consecutive months\nMentored 5 junior representatives and designed onboarding materials\nResolved complex billing disputes reducing escalations by 30%' }
+                ],
+                education: [{ degree: 'Diploma in Business Administration', institution: 'Riyadh College', year: '2020' }]
+            },
+            {
+                icon: 'fas fa-users',
+                title: 'HR Specialist',
+                summary: 'Strategic HR professional with expertise in talent acquisition, employee relations, and organizational development. Passionate about building inclusive workplaces and implementing people-first HR policies aligned with Saudi Vision 2030.',
+                skills: 'Recruitment, Onboarding, HRMS, Labor Law, Performance Management, Training & Development, Employee Relations',
+                work: [
+                    { title: 'HR Coordinator', company: 'PeopleFirst Group', desc: 'Managed end-to-end recruitment for 120+ positions annually\nReduced employee turnover by 18% through engagement initiatives\nDesigned inclusive hiring processes aligned with disability inclusion guidelines' }
+                ],
+                education: [{ degree: 'B.Sc. Human Resources', institution: 'Imam Muhammad ibn Saud University', year: '2021' }]
+            }
+        ],
+        healthcare: [
+            {
+                icon: 'fas fa-stethoscope',
+                title: 'Healthcare Administrator',
+                summary: 'Organized healthcare administrator with 6 years in hospital operations, patient services, and medical records management. Committed to optimizing workflows and ensuring high-quality, patient-centered care delivery.',
+                skills: 'Medical Records, EMR Systems, Patient Scheduling, Healthcare Compliance, Insurance Billing, Team Leadership',
+                work: [
+                    { title: 'Medical Office Coordinator', company: 'National Medical Center', desc: 'Managed daily operations for a 300-bed facility department\nReduced patient wait time by 22% through scheduling optimization\nEnsured 100% compliance with health data privacy regulations' }
+                ],
+                education: [{ degree: 'B.Sc. Health Services Administration', institution: 'King Saud University', year: '2018' }]
+            },
+            {
+                icon: 'fas fa-brain',
+                title: 'Occupational Therapist',
+                summary: 'Compassionate occupational therapist specializing in rehabilitation programs for individuals with physical and cognitive disabilities. Experienced in developing adaptive strategies that maximize independence and quality of life.',
+                skills: 'OT Assessment, Rehabilitation Planning, Assistive Technology, ADL Training, Documentation, Patient Communication',
+                work: [
+                    { title: 'Occupational Therapist', company: 'Rehabilitation Center Riyadh', desc: 'Designed individualized therapy plans for 30+ patients monthly\nAchieved 85% of patients meeting independence milestones within 6 months\nTrained caregivers in home modification techniques and assistive device use' }
+                ],
+                education: [{ degree: 'B.Sc. Occupational Therapy', institution: 'King Saud Bin Abdulaziz University', year: '2019' }]
+            }
+        ],
+        education: [
+            {
+                icon: 'fas fa-chalkboard-teacher',
+                title: 'Special Education Teacher',
+                summary: 'Dedicated special education teacher with 7 years of experience designing individualized learning plans for students with diverse needs. Committed to inclusive education and evidence-based instructional strategies that help every student thrive.',
+                skills: 'IEP Development, Differentiated Instruction, ABA Therapy, Classroom Management, Parent Communication, Assistive Tech',
+                work: [
+                    { title: 'Special Education Teacher', company: 'Al-Amal School for Special Needs', desc: 'Developed and implemented IEPs for 25 students with varied disabilities\nImproved literacy outcomes by 40% using multisensory reading approaches\nCollaborated with speech and OT therapists for holistic student support' }
+                ],
+                education: [{ degree: 'M.Ed. Special Education', institution: 'Taibah University', year: '2017' }]
+            },
+            {
+                icon: 'fas fa-book-open',
+                title: 'Training Coordinator',
+                summary: 'Dynamic training and development coordinator skilled in designing engaging learning programs for corporate teams. Experienced in LMS platforms, needs assessment, and measuring training ROI.',
+                skills: 'LMS Administration, Instructional Design, Facilitation, E-learning, Needs Analysis, Training Evaluation, MS Office',
+                work: [
+                    { title: 'Training Coordinator', company: 'Corporate Learning Hub', desc: 'Delivered 500+ training hours annually across 10 departments\nDesigned e-learning modules reducing in-person training costs by 45%\nAchieved 4.7/5 average participant satisfaction rating' }
+                ],
+                education: [{ degree: 'B.Ed. Educational Technology', institution: 'Qassim University', year: '2020' }]
+            }
+        ],
+        creative: [
+            {
+                icon: 'fas fa-palette',
+                title: 'Graphic Designer',
+                summary: 'Creative graphic designer with 4 years of experience crafting compelling visual identities, marketing materials, and digital content. Proficient in Adobe Creative Suite and passionate about accessible, user-centered design.',
+                skills: 'Adobe Photoshop, Illustrator, InDesign, Figma, Typography, Branding, Social Media Design, Accessibility Design',
+                work: [
+                    { title: 'Graphic Designer', company: 'Creative Studio KSA', desc: 'Designed branding assets for 30+ clients across various industries\nCreated accessible design systems meeting WCAG 2.1 AA standards\nIncreased social media engagement by 55% through visual content strategy' }
+                ],
+                education: [{ degree: 'B.A. Visual Communication Design', institution: 'Dar Al-Hekma University', year: '2020' }]
+            },
+            {
+                icon: 'fas fa-video',
+                title: 'Content Creator',
+                summary: 'Versatile content creator and social media strategist with expertise in video production, copywriting, and audience growth. Skilled at building brand narratives that connect authentically with diverse communities.',
+                skills: 'Video Editing, Adobe Premiere, Copywriting, SEO, Social Media Management, Photography, Analytics, Storytelling',
+                work: [
+                    { title: 'Content Creator & Social Media Manager', company: 'Digital Brand Agency', desc: 'Grew client Instagram accounts from 2K to 80K followers in 12 months\nProduced 50+ video reels per quarter with average 200K+ views\nManaged content calendar and posting schedule across 6 platforms' }
+                ],
+                education: [{ degree: 'Diploma in Media & Communications', institution: 'Prince Sultan University', year: '2021' }]
+            }
+        ]
+    };
+
+    let currentCat = 'tech';
+
+    function showCat(cat, btn) {
+        currentCat = cat;
+        document.querySelectorAll('#templateCats button').forEach(b => {
+            b.style.background = '';
+            b.style.color = '';
+            b.style.border = '';
+            b.classList.remove('active-cat');
+            b.style.background = 'white';
+            b.style.color = '#475569';
+            b.style.border = '1px solid #e2e8f0';
+        });
+        btn.style.background = 'linear-gradient(135deg,#14b8a6,#0d9488)';
+        btn.style.color = 'white';
+        btn.style.border = 'none';
+        renderTemplates();
+    }
+
+    function renderTemplates() {
+        const grid = document.getElementById('templateGrid');
+        const list = TEMPLATES[currentCat] || [];
+        grid.innerHTML = list.map((t, i) => `
+            <div class="col-12">
+                <div class="p-3 bg-white rounded-4 border d-flex align-items-center gap-3 shadow-sm"
+                    style="cursor:pointer;transition:all 0.2s;"
+                    onmouseenter="this.style.borderColor='#14b8a6';this.style.boxShadow='0 4px 15px rgba(20,184,166,0.15)'"
+                    onmouseleave="this.style.borderColor='';this.style.boxShadow=''"
+                    onclick="applyTemplateByIdx('${currentCat}',${i})">
+                    <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="${t.icon} text-white"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-800 text-dark small">${t.title}</div>
+                        <div class="text-muted" style="font-size:0.78rem;">Click to apply this template</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted small"></i>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function applyTemplateByIdx(cat, idx) {
+        const t = (TEMPLATES[cat] || [])[idx];
+        if (t) applyTemplate(t);
+    }
+
+    function applyTemplate(t) {
+        if (!confirm(`Apply the "${t.title}" template? This will replace current content.`)) return;
+
+        document.getElementById('summary').value = t.summary || '';
+        document.getElementById('skillsInput').value = t.skills || '';
+        updatePreview();
+        updateSkills();
+
+        document.getElementById('workContainer').innerHTML = '';
+        document.getElementById('p-work-list').innerHTML = '<p class="text-muted fst-italic small">No work experience added yet.</p>';
+        workCount = 0;
+        (t.work || []).forEach(w => {
+            addWork();
+            const id = workCount;
+            document.getElementById(`work-title-${id}`).value = w.title || '';
+            document.getElementById(`work-company-${id}`).value = w.company || '';
+            document.getElementById(`work-desc-${id}`).value = w.desc || '';
+            if (document.getElementById(`work-start-${id}`)) document.getElementById(`work-start-${id}`).value = w.start || '';
+            if (document.getElementById(`work-end-${id}`)) document.getElementById(`work-end-${id}`).value = w.end || '';
+            updateWorkPreview(id);
+        });
+
+        document.getElementById('eduContainer').innerHTML = '';
+        document.getElementById('p-edu-list').innerHTML = '<p class="text-muted fst-italic small">No education added yet.</p>';
+        eduCount = 0;
+        (t.education || []).forEach(e => {
+            addEdu();
+            const id = eduCount;
+            document.getElementById(`edu-degree-${id}`).value = e.degree || '';
+            document.getElementById(`edu-inst-${id}`).value = e.institution || '';
+            document.getElementById(`edu-year-${id}`).value = e.year || '';
+            updateEduPreview(id);
+        });
+
+        updateHealthMeter();
+    }
+
+    renderTemplates();
+    // ========== END TEMPLATES ==========
+
+    function optimizeAI() {
+        const btn = event.currentTarget.querySelector('div');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Improving...';
+
+        setTimeout(() => {
+            const summary = document.getElementById('summary');
+            if (summary.value.length < 50) {
+                summary.value = "Results-driven professional with a proven track record of adaptability and strategic problem-solving. Specialized capabilities in [Your Field] with a strong commitment to inclusive excellence and team collaboration.";
+                updatePreview();
+            }
+            btn.innerHTML = '<i class="fas fa-check me-2"></i> Optimized!';
+            setTimeout(() => btn.innerHTML = original, 2000);
+        }, 1500);
+    }
+</script>
+{% endblock %}

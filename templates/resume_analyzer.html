@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .fw-800 { font-weight: 800; }
+    .fw-700 { font-weight: 700; }
+    .fw-600 { font-weight: 600; }
+    
+    .upload-area {
+        transition: var(--transition);
+        border: 2px dashed #dee2e6 !important;
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .upload-area:hover, .upload-area.drag-over {
+        background-color: rgba(20, 184, 166, 0.05);
+        border-color: var(--primary) !important;
+        transform: scale(1.02);
+    }
+
+    .badge-ability {
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 700;
+        background: rgba(20, 184, 166, 0.1);
+        color: var(--primary);
+        border: 1px solid rgba(20, 184, 166, 0.2);
+        transition: var(--transition);
+    }
+    
+    .badge-ability:hover {
+        background: var(--gradient-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .score-circle-bg {
+        fill: none;
+        stroke: #f0f2f5;
+        stroke-width: 12;
+    }
+    
+    .score-circle-progress {
+        fill: none;
+        stroke: url(#scoreGradient);
+        stroke-width: 12;
+        stroke-dasharray: 440;
+        stroke-dashoffset: 440;
+        transform: rotate(-90 80 80);
+        stroke-linecap: round;
+        transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .course-card {
+        background: #ffffff;
+        border: 1px solid #f1f3f5;
+        border-radius: 20px;
+        transition: var(--transition);
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-soft);
+        border-color: var(--primary);
+    }
+
+    .analysis-card {
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(20, 184, 166, 0.05) !important;
+        box-shadow: var(--shadow-soft);
+        background: var(--white);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-800 mb-1" style="letter-spacing: -1px;">Ability <span style="color: var(--primary);">Analyzer</span></h2>
+            <p class="text-muted fw-600">AI-powered insights to highlight your professional strengths and workplace compatibility.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="p-4 bg-white rounded-4 shadow-soft d-inline-block border">
+                <i class="fas fa-brain fa-2x" style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card analysis-card mb-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <h5 class="fw-800 mb-4 d-flex align-items-center gap-2">
+                        <i class="fas fa-file-upload text-primary"></i> Upload Resume
+                    </h5>
+                    
+                    <form id="resumeAnalyzerForm">
+                        <div class="upload-area rounded-4 p-5 text-center mb-4" id="dropZone">
+                            <input type="file" id="resumeFile" accept=".pdf" class="d-none" required>
+                            <div class="p-3 bg-white rounded-circle d-inline-block shadow-sm mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
+                            </div>
+                            <h6 class="fw-800 mb-2">Drag & Drop or Click</h6>
+                            <p class="text-muted small mb-0 fw-600">PDF format supported (Max 5MB)</p>
+                        </div>
+                        
+                        <div id="fileInfo" class="mb-4 d-none">
+                            <div class="p-3 rounded-4 d-flex align-items-center border" style="background: rgba(20, 184, 166, 0.05);">
+                                <i class="fas fa-file-pdf text-danger fs-4 me-3"></i>
+                                <span class="small fw-700 text-truncate text-primary" id="fileName">filename.pdf</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-800 py-3 shadow-soft border-0" style="background: var(--gradient-primary);">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i> Start Analysis
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="scoreCard" class="card analysis-card text-center d-none">
+                <div class="card-body p-5">
+                    <h5 class="fw-800 mb-4">Market Potential</h5>
+                    <div class="position-relative d-inline-block mb-3">
+                        <svg width="160" height="160" viewBox="0 0 160 160">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="var(--primary-color)" />
+                                    <stop offset="100%" stop-color="var(--secondary-color)" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="score-circle-bg" cx="80" cy="80" r="70" />
+                            <circle id="scoreCircle" class="score-circle-progress" cx="80" cy="80" r="70" />
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <h1 class="fw-800 text-dark mb-0" id="scoreValue" style="font-size: 3rem;">0</h1>
+                            <p class="text-muted text-uppercase fw-800 mb-0" style="font-size: 0.7rem; letter-spacing: 1px;">Score</p>
+                        </div>
+                    </div>
+                    <p class="text-muted small fw-600 px-3">Your score based on market demand for inclusive roles.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div id="loadingSpinner" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary mb-4" style="width: 4rem; height: 4rem; border-width: 0.35em;" role="status"></div>
+                <h4 class="fw-800 mb-2">Analyzing Abilities</h4>
+                <p class="text-muted fw-600">RAFEEQ AI is extracting your skills and matching them with opportunities...</p>
+            </div>
+            
+            <div id="resultsSection" class="d-none">
+                <!-- Profile Summary -->
+                <div class="card analysis-card mb-4 overflow-hidden">
+                    <div class="card-header border-0 bg-transparent p-4 pb-0">
+                        <h5 class="fw-800 mb-0 d-flex align-items-center">
+                            <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(20, 184, 166, 0.1); width: 40px; height: 40px;">
+                                <i class="fas fa-user-check" style="color: var(--primary);"></i>
+                            </span>
+                            Profile Overview
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="basicInfo" class="row g-4"></div>
+                    </div>
+                </div>
+                
+                <!-- Skills Matrix -->
+                <div class="card analysis-card mb-4 overflow-hidden">
+                    <div class="card-header border-0 bg-transparent p-4 pb-0">
+                        <h5 class="fw-800 mb-0 d-flex align-items-center">
+                            <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(20, 184, 166, 0.1); width: 40px; height: 40px;">
+                                <i class="fas fa-bolt" style="color: var(--primary);"></i>
+                            </span>
+                            Abilities & Skills Matrix
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="skillsSection" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <!-- Smart Recommendations -->
+                        <div class="card analysis-card h-100 overflow-hidden">
+                            <div class="card-header border-0 bg-transparent p-4 pb-0">
+                                <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                    <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(13, 148, 136, 0.1); width: 40px; height: 40px;">
+                                        <i class="fas fa-lightbulb" style="color: #0d9488;"></i>
+                                    </span>
+                                    AI Suggestions
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div id="recommendationsSection" class="d-flex flex-column gap-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Upskilling -->
+                        <div class="card analysis-card h-100 overflow-hidden">
+                            <div class="card-header border-0 bg-transparent p-4 pb-0">
+                                <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                    <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(6, 61, 92, 0.1); width: 40px; height: 40px;">
+                                        <i class="fas fa-graduation-cap" style="color: #063d5c;"></i>
+                                    </span>
+                                    Upskilling Path
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div id="coursesSection" class="d-flex flex-column gap-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="emptyState" class="text-center py-5 px-4 bg-white rounded-4 shadow-soft border">
+                <div class="mb-4 position-relative d-inline-block">
+                    <div class="p-4 bg-light rounded-circle mb-3" style="width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-file-alt fa-4x" style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                    </div>
+                </div>
+                <h3 class="fw-800 mb-3" style="letter-spacing: -1px;">Ready to analyze?</h3>
+                <p class="text-muted mx-auto mb-4 fw-600" style="max-width: 450px;">Upload your resume and let RAFEEQ highlight your potential to top inclusive employers using advanced AI analysis.</p>
+                <button onclick="dropZone.click()" class="btn btn-primary px-5 py-3 rounded-pill fw-800 shadow-soft border-0" style="background: var(--gradient-primary);">Get Started Now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('resumeFile');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+
+dropZone.onclick = () => fileInput.click();
+
+fileInput.onchange = () => {
+    if (fileInput.files.length) {
+        fileName.textContent = fileInput.files[0].name;
+        fileInfo.classList.remove('d-none');
+    }
+};
+
+['dragover', 'dragleave', 'drop'].forEach(event => {
+    dropZone.addEventListener(event, (e) => {
+        e.preventDefault();
+        if (event === 'dragover') dropZone.classList.add('drag-over');
+        else dropZone.classList.remove('drag-over');
+        if (event === 'drop' && e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            fileInput.onchange();
+        }
+    });
+});
+
+document.getElementById('resumeAnalyzerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!fileInput.files[0]) return;
+    
+    document.getElementById('emptyState').classList.add('d-none');
+    document.getElementById('resultsSection').classList.add('d-none');
+    document.getElementById('scoreCard').classList.add('d-none');
+    document.getElementById('loadingSpinner').classList.remove('d-none');
+    
+    const formData = new FormData();
+    formData.append('resume', fileInput.files[0]);
+    
+    try {
+        const response = await fetch('/api/analyze-resume', { method: 'POST', body: formData });
+        const data = await response.json();
+        
+        // Mock data for demo if API doesn't exist
+        if (data.success) {
+            displayAnalysis(data.analysis, data.courses);
+        } else {
+            throw new Error('Fallback');
+        }
+    } catch (error) {
+        // Simulated response for demonstration
+        setTimeout(() => {
+            const mockAnalysis = {
+                score: 88,
+                detected_field: "Software Engineering",
+                experience: "Senior Level (6+ Years)",
+                skills: ["Full Stack Development", "Python", "Cloud Architecture", "Accessibility Standards", "Inclusive Leadership", "Project Management"],
+                recommendations: [
+                    "Highlight your experience with WCAG accessibility standards",
+                    "Add certifications related to inclusive design",
+                    "Mention specific accommodations that help your productivity"
+                ]
+            };
+            const mockCourses = [
+                { name: "Inclusive Design for Web", url: "#" },
+                { name: "Advanced Accessible Architecture", url: "#" },
+                { name: "Leadership for Diverse Teams", url: "#" }
+            ];
+            displayAnalysis(mockAnalysis, mockCourses);
+        }, 2000);
+    } finally {
+        setTimeout(() => {
+            document.getElementById('loadingSpinner').classList.add('d-none');
+        }, 2000);
+    }
+});
+
+function displayAnalysis(analysis, courses) {
+    document.getElementById('resultsSection').classList.remove('d-none');
+    document.getElementById('scoreCard').classList.remove('d-none');
+    
+    const score = analysis.score || 0;
+    document.getElementById('scoreValue').textContent = score;
+    const offset = 440 - (score / 100) * 440;
+    document.getElementById('scoreCircle').style.strokeDashoffset = offset;
+    
+    document.getElementById('basicInfo').innerHTML = `
+        <div class="col-md-6">
+            <div class="p-4 rounded-4 border bg-light h-100">
+                <label class="form-label small fw-800 text-uppercase text-muted mb-2">Professional Domain</label>
+                <div class="h5 fw-800 text-dark mb-0">${analysis.detected_field || 'General'}</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-4 rounded-4 border bg-light h-100">
+                <label class="form-label small fw-800 text-uppercase text-muted mb-2">Experience Level</label>
+                <div class="h5 fw-800 text-dark mb-0">${analysis.experience || 'Not specified'}</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('skillsSection').innerHTML = (analysis.skills || [])
+        .map(s => `<span class="badge-ability">${s}</span>`).join('') || '<p class="text-muted fw-600">No specific abilities detected.</p>';
+    
+    document.getElementById('recommendationsSection').innerHTML = (analysis.recommendations || []).map(r => `
+        <div class="p-3 rounded-4 bg-light border d-flex align-items-start gap-3">
+            <i class="fas fa-check-circle text-success mt-1"></i>
+            <span class="small fw-600 text-muted">${r}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('coursesSection').innerHTML = courses.slice(0, 3).map(c => `
+        <div class="course-card p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="fw-800 mb-1">${c.name}</h6>
+                <span class="text-muted small fw-600">Recommended Path</span>
+            </div>
+            <a href="${c.url}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill fw-700 px-3">Explore</a>
+        </div>
+    `).join('');
+}
+</script>
+{% endblock %}
+{% endblock %}

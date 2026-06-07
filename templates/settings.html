@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - RAFEEQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="mb-5">
+        <h2 class="fw-800 mb-1" style="letter-spacing: -1px;">Account <span style="color: var(--primary);">Settings</span></h2>
+        <p class="text-muted mb-0">Personalize your RAFEEQ experience and manage preferences</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Settings Navigation -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-soft rounded-4 overflow-hidden sticky-top" style="top: 2rem; background: var(--white); border: 1px solid var(--glass-border) !important;">
+                <div class="card-body p-3">
+                    <div class="nav flex-column nav-pills gap-2" id="settingsTab" role="tablist">
+                        <button class="nav-link active d-flex align-items-center py-3 px-4 rounded-4 fw-600 border-0" id="account-tab" data-bs-toggle="pill" data-bs-target="#account" type="button" role="tab" style="transition: var(--transition);">
+                            <i class="fas fa-user-circle me-3"></i> Profile
+                        </button>
+                        <button class="nav-link d-flex align-items-center py-3 px-4 rounded-4 fw-600 border-0" id="accessibility-tab" data-bs-toggle="pill" data-bs-target="#accessibility" type="button" role="tab" style="transition: var(--transition);">
+                            <i class="fas fa-universal-access me-3"></i> Accessibility
+                        </button>
+                        <button class="nav-link d-flex align-items-center py-3 px-4 rounded-4 fw-600 border-0" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab" style="transition: var(--transition);">
+                            <i class="fas fa-shield-alt me-3"></i> Security
+                        </button>
+                        <button class="nav-link d-flex align-items-center py-3 px-4 rounded-4 fw-600 border-0" id="notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab" style="transition: var(--transition);">
+                            <i class="fas fa-bell me-3"></i> Alerts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="col-lg-9">
+            <div class="tab-content border-0" id="settingsTabContent">
+                <!-- Profile Settings -->
+                <div class="tab-pane fade show active" id="account" role="tabpanel">
+                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden" style="background: var(--white);">
+                        <div class="card-header border-0 bg-transparent p-4 pb-0">
+                            <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(20, 184, 166, 0.1); width: 40px; height: 40px;">
+                                    <i class="fas fa-user-circle" style="color: var(--primary);"></i>
+                                </span>
+                                Profile Information
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="accountForm">
+                                <div class="row g-4 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="editFullName" class="form-label small fw-800 text-uppercase text-muted mb-2">Full Name</label>
+                                            <input type="text" class="form-control form-control-lg rounded-4 border p-3" id="editFullName" value="{{ session.get('full_name', '') }}" style="background: #f8f9fa;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="editEmail" class="form-label small fw-800 text-uppercase text-muted mb-2">Email Address</label>
+                                            <input type="email" class="form-control form-control-lg rounded-4 border p-3" id="editEmail" placeholder="name@example.com" style="background: #f8f9fa;">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="editBio" class="form-label small fw-800 text-uppercase text-muted mb-2">Professional Bio</label>
+                                            <textarea class="form-control form-control-lg rounded-4 border p-3" id="editBio" rows="4" placeholder="Briefly describe your professional background and goals..." style="background: #f8f9fa;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-700 shadow-sm border-0" style="background: var(--gradient-primary);">
+                                    Update Profile
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accessibility Settings -->
+                <div class="tab-pane fade" id="accessibility" role="tabpanel">
+                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden" style="background: var(--white);">
+                        <div class="card-header border-0 bg-transparent p-4 pb-0">
+                            <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(156, 28, 224, 0.1); width: 40px; height: 40px;">
+                                    <i class="fas fa-universal-access" style="color: var(--secondary);"></i>
+                                </span>
+                                Accessibility Preferences
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="text-muted small mb-4">We use these to match you with inclusive employers and tailor the platform to your needs.</p>
+                            
+                            <form id="accessibilityForm">
+                                <div class="mb-4">
+                                    <label class="form-label small fw-800 text-uppercase text-muted d-block mb-3">Workplace Accommodations</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check p-4 border rounded-4 bg-light transition-all h-100 d-flex align-items-center">
+                                                <input class="form-check-input ms-0 me-3 custom-check" type="checkbox" id="prefRemote" checked>
+                                                <label class="form-check-label fw-600" for="prefRemote">Remote Work Option</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check p-4 border rounded-4 bg-light transition-all h-100 d-flex align-items-center">
+                                                <input class="form-check-input ms-0 me-3 custom-check" type="checkbox" id="prefWheelchair">
+                                                <label class="form-check-label fw-600" for="prefWheelchair">Wheelchair Access</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check p-4 border rounded-4 bg-light transition-all h-100 d-flex align-items-center">
+                                                <input class="form-check-input ms-0 me-3 custom-check" type="checkbox" id="prefHours" checked>
+                                                <label class="form-check-label fw-600" for="prefHours">Flexible Working Hours</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check p-4 border rounded-4 bg-light transition-all h-100 d-flex align-items-center">
+                                                <input class="form-check-input ms-0 me-3 custom-check" type="checkbox" id="prefScreenReader">
+                                                <label class="form-check-label fw-600" for="prefScreenReader">Screen Reader Optimized</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="uiComplexity" class="form-label small fw-800 text-uppercase text-muted mb-2">Platform Interface Style</label>
+                                    <select class="form-select form-select-lg border rounded-4 p-3" id="uiComplexity" style="background: #f8f9fa;">
+                                        <option value="standard">Standard Interface</option>
+                                        <option value="high-contrast">High Contrast Mode</option>
+                                        <option value="simplified">Simplified / Focus Mode</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="btn btn-secondary rounded-pill px-5 py-3 fw-700 shadow-sm border-0" style="background: var(--secondary-grad);">
+                                    Save Accessibility Profile
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="tab-pane fade" id="security" role="tabpanel">
+                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden" style="background: var(--white);">
+                        <div class="card-header border-0 bg-transparent p-4 pb-0">
+                            <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(255, 71, 87, 0.1); width: 40px; height: 40px;">
+                                    <i class="fas fa-shield-alt" style="color: #ff4757;"></i>
+                                </span>
+                                Security Settings
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="passwordForm">
+                                <div class="mb-4">
+                                    <label for="currentPassword" class="form-label small fw-800 text-uppercase text-muted mb-2">Current Password</label>
+                                    <input type="password" class="form-control form-control-lg rounded-4 border p-3" id="currentPassword" style="background: #f8f9fa;">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="newPassword" class="form-label small fw-800 text-uppercase text-muted mb-2">New Password</label>
+                                    <input type="password" class="form-control form-control-lg rounded-4 border p-3" id="newPassword" style="background: #f8f9fa;">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="confirmPassword" class="form-label small fw-800 text-uppercase text-muted mb-2">Confirm New Password</label>
+                                    <input type="password" class="form-control form-control-lg rounded-4 border p-3" id="confirmPassword" style="background: #f8f9fa;">
+                                </div>
+                                <button type="submit" class="btn btn-dark rounded-pill px-5 py-3 fw-700 shadow-sm border-0" style="background: #2f3542;">
+                                    Update Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Settings -->
+                <div class="tab-pane fade" id="notifications" role="tabpanel">
+                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden" style="background: var(--white);">
+                        <div class="card-header border-0 bg-transparent p-4 pb-0">
+                            <h5 class="fw-800 mb-0 d-flex align-items-center">
+                                <span class="p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" style="background: rgba(46, 213, 115, 0.1); width: 40px; height: 40px;">
+                                    <i class="fas fa-bell" style="color: #2ed573;"></i>
+                                </span>
+                                Alert Preferences
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <h6 class="fw-800 mb-4 small text-muted text-uppercase">Email Notifications</h6>
+                                <div class="form-check form-switch p-4 border rounded-4 bg-light mb-3 d-flex align-items-center">
+                                    <input class="form-check-input ms-0 me-3" type="checkbox" id="emailJobMatches" checked style="width: 3rem; height: 1.5rem;">
+                                    <label class="form-check-label fw-600" for="emailJobMatches">New job matches that meet my accessibility needs</label>
+                                </div>
+                                <div class="form-check form-switch p-4 border rounded-4 bg-light mb-3 d-flex align-items-center">
+                                    <input class="form-check-input ms-0 me-3" type="checkbox" id="emailApplications" checked style="width: 3rem; height: 1.5rem;">
+                                    <label class="form-check-label fw-600" for="emailApplications">Updates on my applications</label>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success rounded-pill px-5 py-3 fw-700 shadow-sm border-0" style="background: #2ed573;" onclick="saveNotifications()">
+                                Save Alert Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fw-500 { font-weight: 500; }
+    .fw-600 { font-weight: 600; }
+    .fw-700 { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    
+    .shadow-soft {
+        box-shadow: 0 10px 40px rgba(20, 184, 166, 0.05) !important;
+    }
+
+    .nav-pills .nav-link {
+        color: #6c757d;
+        background: transparent;
+        transition: var(--transition);
+        border: 1px solid transparent !important;
+    }
+    
+    .nav-pills .nav-link:hover {
+        background: rgba(20, 184, 166, 0.05);
+        color: var(--primary);
+    }
+    
+    .nav-pills .nav-link.active {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+        box-shadow: 0 10px 20px rgba(20, 184, 166, 0.2);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+        background-color: white !important;
+    }
+
+    .transition-all {
+        transition: var(--transition);
+    }
+
+    .form-check.bg-light:hover {
+        background: #fff !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 5px 15px rgba(20, 184, 166, 0.05);
+    }
+
+    .custom-check:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #2ed573;
+        border-color: #2ed573;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('accountForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById('editFullName').value;
+    const email = document.getElementById('editEmail').value;
+    const bio = document.getElementById('editBio').value;
+
+    if (!fullName || !email) {
+        alert('Please fill in all required fields!');
+        return;
+    }
+
+    alert('Account settings saved successfully!');
+});
+
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const currentPass = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirmPass = document.getElementById('confirmPassword').value;
+
+    if (!currentPass || !newPass || !confirmPass) {
+        alert('Please fill in all password fields!');
+        return;
+    }
+
+    if (newPass !== confirmPass) {
+        alert('New passwords do not match!');
+        return;
+    }
+
+    if (newPass.length < 6) {
+        alert('Password must be at least 6 characters long!');
+        return;
+    }
+
+    alert('Password updated successfully!');
+    document.getElementById('passwordForm').reset();
+});
+
+function saveNotifications() {
+    const jobMatches = document.getElementById('emailJobMatches').checked;
+    const applications = document.getElementById('emailApplications').checked;
+
+    alert('Notification preferences saved successfully!');
+}
+
+document.getElementById('accessibilityForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Accessibility preferences saved successfully!');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+
+{% block title %}Career Guidance - RAFEEQ{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-5 align-items-center animate-up">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-800 mb-2"
+                style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Career Pathway
+            </h1>
+            <p class="text-muted lead fw-500">Expert advice and personalized resources to empower your professional
+                journey</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <!-- Learning Path Progress -->
+            <div class="progress-card d-inline-block text-start p-3 bg-white rounded-4 shadow-sm border border-light">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="p-2 bg-success bg-opacity-10 rounded-circle text-success me-2">
+                        <i class="fas fa-trophy small"></i>
+                    </div>
+                    <div>
+                        <small class="fw-bold text-dark d-block">Your Progress</small>
+                        <small class="text-muted extra-small">2 of 4 Modules Completed</small>
+                    </div>
+                </div>
+                <div class="progress" style="height: 6px; width: 200px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Tip Section -->
+    <div class="alert alert-dismissible fade show bg-white border-0 shadow-sm rounded-4 p-4 mb-5 animate-up delay-1"
+        role="alert" style="border-left: 5px solid var(--secondary-color) !important;">
+        <div class="d-flex align-items-start">
+            <div class="p-3 bg-secondary bg-opacity-10 rounded-circle text-secondary me-3">
+                <i class="far fa-lightbulb fa-lg"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-dark mb-1">Tip of the Day</h5>
+                <p class="text-muted mb-0">"When discussing accommodations, focus on the productivity outcome. Frame it
+                    as 'This tool allows me to work 20% faster' rather than 'I need this tool'."</p>
+            </div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- Category Selection -->
+    <div class="row g-4 mb-5 animate-up delay-2">
+        <div class="col-md-3">
+            <button class="category-card active" onclick="loadContent('interview', this)">
+                <div class="category-icon-wrapper">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h6 class="fw-700 mb-0">Interview Tips</h6>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="category-card" onclick="loadContent('career_paths', this)">
+                <div class="category-icon-wrapper">
+                    <i class="fas fa-road"></i>
+                </div>
+                <h6 class="fw-700 mb-0">Career Paths</h6>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="category-card" onclick="loadContent('workplace', this)">
+                <div class="category-icon-wrapper">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h6 class="fw-700 mb-0">Workplace Success</h6>
+            </button>
+        </div>
+        <div class="col-md-3">
+            <button class="category-card" onclick="loadContent('accommodation', this)">
+                <div class="category-icon-wrapper">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h6 class="fw-700 mb-0">Request Templates</h6>
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div id="contentArea" class="min-vh-50 animate-up delay-3">
+        <!-- Content will be loaded here via JS -->
+    </div>
+</div>
+
+<style>
+    /* Premium Page Entry Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    }
+
+    .delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    .delay-3 {
+        animation-delay: 0.3s;
+    }
+
+    /* Typography */
+    .fw-800 {
+        font-weight: 800;
+    }
+
+    .fw-700 {
+        font-weight: 700;
+    }
+
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .fw-500 {
+        font-weight: 500;
+    }
+
+    .extra-small {
+        font-size: 0.75rem;
+    }
+
+    /* Cards - Matching Dashboard action-card style */
+    .category-card {
+        width: 100%;
+        padding: 2.5rem 1.5rem;
+        background: #ffffff;
+        border-radius: var(--border-radius-lg, 24px);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.05));
+    }
+
+    .category-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--gradient-primary);
+        transition: all 0.3s ease;
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+        border-color: var(--primary-color);
+    }
+
+    .category-card:hover::after,
+    .category-card.active::after {
+        transform: scaleX(1);
+    }
+
+    .category-card.active {
+        background: #ffffff;
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .category-icon-wrapper {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: #ffffff;
+        background: var(--gradient-primary);
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-card:hover .category-icon-wrapper {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .category-card h6 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    /* Content Cards */
+    .guidance-glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: 30px;
+        padding: 45px;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+    }
+
+    .tip-item-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(20, 184, 166, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tip-item-card:hover {
+        transform: translateX(10px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--primary-color);
+    }
+
+    .tip-item-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 5px;
+        background: var(--primary-color);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .tip-item-card:hover::before {
+        opacity: 1;
+    }
+
+    /* Template Cards - Matching Dashboard action-card style */
+    .template-premium-card {
+        background: #ffffff;
+        border-radius: var(--border-radius-lg, 24px);
+        padding: 2.5rem 1.5rem;
+        height: 100%;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .template-premium-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--gradient-primary);
+        transition: all 0.3s ease;
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    .template-premium-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+    }
+
+    .template-premium-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .btn-premium {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(20, 184, 166, 0.2);
+    }
+
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(20, 184, 166, 0.3);
+        color: white;
+    }
+
+    /* Career Path Card */
+    .career-path-premium-card {
+        background: linear-gradient(135deg, #063d5c 0%, #0a4f75 100%);
+        color: white;
+        border-radius: 25px;
+        padding: 40px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(6, 61, 92, 0.25);
+    }
+
+    .career-path-premium-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+
+    .glass-badge {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 5px;
+        display: inline-block;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadContent('interview', document.querySelector('.category-card.active'));
+    });
+
+    async function loadContent(type, element) {
+        if (element) {
+            document.querySelectorAll('.category-card').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        const contentArea = document.getElementById('contentArea');
+        contentArea.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted fw-bold">Fetching expert insights...</p>
+            </div>`;
+
+        try {
+            if (type === 'accommodation') {
+                displayAccommodationTemplates();
+            } else {
+                const response = await fetch(`/api/career-guidance/${type}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    if (type === 'interview') displayInterviewTips(result.guidance);
+                    else if (type === 'career_paths') displayCareerPaths(result.guidance);
+                    else if (type === 'workplace') displayWorkplaceTips(result.guidance);
+                }
+            }
+        } catch (error) {
+            contentArea.innerHTML = `
+                <div class="guidance-glass-card text-center py-5">
+                    <i class="fas fa-wifi fa-3x text-danger mb-3"></i>
+                    <h4 class="fw-700">Connection Interrupted</h4>
+                    <p class="text-muted">We couldn't load the guidance content. Please try again.</p>
+                    <button class="btn btn-premium mt-3" onclick="location.reload()">Retry Analysis</button>
+                </div>`;
+        }
+    }
+
+    function displayInterviewTips(guidance) {
+        let html = `
+            <div class="guidance-glass-card fade-in">
+                <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+                    <div class="p-3 bg-primary bg-opacity-10 rounded-4 text-primary me-4">
+                        <i class="fas fa-lightbulb fa-2x"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-800 mb-1 text-dark">Interview Mastery</h2>
+                        <p class="text-muted mb-0 fw-500">Strategic approaches to showcase your potential</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-4 mb-5 shadow-sm" style="background: linear-gradient(to right, rgba(20, 184, 166, 0.05), white); border-left: 6px solid var(--primary-color);">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-quote-left text-primary fa-lg me-3 mt-1 opacity-50"></i>
+                        <div class="fw-600 text-dark fst-italic lead" style="font-size: 1.1rem;">${guidance.general_advice}</div>
+                    </div>
+                </div>
+
+                <div class="row">
+        `;
+
+        guidance.tips.forEach(tip => {
+            html += `
+                <div class="col-12">
+                    <div class="tip-item-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary me-3">
+                                <i class="fas fa-check small"></i>
+                            </div>
+                            <h5 class="fw-700 mb-0 text-dark">${tip.title}</h5>
+                        </div>
+                        <p class="mb-0 text-muted ps-5" style="line-height: 1.6;">${tip.content}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    function displayCareerPaths(paths) {
+        let html = `
+            <div class="guidance-glass-card fade-in">
+                <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+                    <div class="p-3 bg-opacity-10 rounded-4 me-4" style="background-color: rgba(6, 61, 92, 0.1); color: #063d5c;">
+                        <i class="fas fa-route fa-2x"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-800 mb-1 text-dark">Recommended Pathways</h2>
+                        <p class="text-muted mb-0 fw-500">Roles optimized for your unique profile</p>
+                    </div>
+                </div>
+        `;
+
+        paths.forEach(path => {
+            const fieldName = path.field || path.name || path.title || 'Career Field';
+            const accessNotes = path.accessibility_notes || path.notes || '';
+            const rolePaths = path.paths || path.roles || [];
+            const reqSkills = path.required_skills || path.skills || [];
+            html += `
+                <div class="career-path-premium-card">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h3 class="fw-800 mb-0 display-6" style="font-size: 1.8rem;">${fieldName}</h3>
+                        <div class="glass-badge text-warning border-warning">
+                            <i class="fas fa-star me-1"></i> Top Match
+                        </div>
+                    </div>
+                    <p class="lead mb-4 opacity-90 fw-500" style="max-width: 80%;">${accessNotes}</p>
+                    
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6 border-end border-white border-opacity-25">
+                            <label class="text-uppercase small fw-800 opacity-75 d-block mb-3 ls-1">Target Roles</label>
+                            <div class="d-flex flex-wrap">
+                                ${rolePaths.map(p => `<span class="glass-badge"><i class="fas fa-briefcase me-2 small opacity-50"></i>${p}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="col-md-6 ps-md-4">
+                            <label class="text-uppercase small fw-800 opacity-75 d-block mb-3 ls-1">Skills in Demand</label>
+                            <div class="d-flex flex-wrap">
+                                ${reqSkills.map(s => `<span class="glass-badge bg-white text-primary fw-bold" style="background: white; color: #063d5c;">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    function displayWorkplaceTips(guidance) {
+        let html = `
+            <div class="guidance-glass-card fade-in">
+                <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+                    <div class="p-3 bg-opacity-10 rounded-4 me-4" style="background-color: rgba(20, 184, 166, 0.1); color: #14b8a6;">
+                        <i class="fas fa-building fa-2x"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-800 mb-1 text-dark">Workplace Excellence</h2>
+                        <p class="text-muted mb-0 fw-500">Thriving in professional environments</p>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
+        `;
+
+        guidance.tips.forEach(tip => {
+            html += `
+                <div class="col-md-6">
+                    <div class="tip-item-card h-100 mb-0 d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-check-circle text-primary fa-lg"></i>
+                        </div>
+                        <span class="fw-600 text-dark" style="line-height: 1.5;">${tip}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div class="mt-4 p-4 rounded-4" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <h6 class="fw-800 mb-3 text-dark text-uppercase small ls-1">Curated Resources</h6>
+                    <div class="d-flex flex-wrap gap-3">
+        `;
+
+        guidance.additional_resources.forEach(resource => {
+            html += `
+                <span class="badge bg-white text-dark border p-3 rounded-pill shadow-sm fw-600">
+                    <i class="fas fa-external-link-alt text-primary me-2 small"></i>${resource}
+                </span>
+            `;
+        });
+
+        html += `</div></div></div>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    function displayAccommodationTemplates() {
+        const templates = [
+            { type: 'wheelchair_access', title: 'Wheelchair Access', icon: 'wheelchair', color: 'brand-teal' },
+            { type: 'flexible_schedule', title: 'Flexible Schedule', icon: 'clock', color: 'brand-navy' },
+            { type: 'remote_work', title: 'Remote Work', icon: 'laptop-house', color: 'brand-teal-light' },
+            { type: 'special_equipment', title: 'Assistive Tech', icon: 'keyboard', color: 'brand-teal-dark' }
+        ];
+
+        let html = `
+            <div class="guidance-glass-card fade-in">
+                <div class="d-flex align-items-center mb-5 border-bottom pb-4">
+                    <div class="p-3 bg-opacity-10 rounded-4 me-4" style="background-color: rgba(13, 148, 136, 0.1); color: #0d9488;">
+                        <i class="fas fa-file-signature fa-2x"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-800 mb-1 text-dark">Request Templates</h2>
+                        <p class="text-muted mb-0 fw-500">Professional templates for accommodation requests</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+        `;
+
+        templates.forEach(t => {
+            html += `
+                <div class="col-md-6">
+                    <div class="template-premium-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="category-icon-wrapper me-3" style="width: 50px; height: 50px; font-size: 1.2rem; margin-bottom: 0;">
+                                <i class="fas fa-${t.icon}"></i>
+                            </div>
+                            <h5 class="fw-800 mb-0 text-dark">${t.title}</h5>
+                        </div>
+                        <p class="text-muted small mb-4 fw-500" style="line-height: 1.6;">Professionally crafted template to clearly communicate your need for ${t.title.toLowerCase()} to potential employers.</p>
+                        <div class="mt-auto">
+                            <button class="btn btn-premium w-100 shadow-sm" onclick="viewTemplate('${t.type}')">
+                                <i class="fas fa-eye me-2"></i> View Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    async function viewTemplate(templateType) {
+        try {
+            const response = await fetch(`/api/accommodation-template/${templateType}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const t = result.template;
+                const modalHtml = `
+                    <div class="modal fade" id="templateModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 rounded-4 shadow-lg">
+                                <div class="modal-header border-0 p-4 pb-0">
+                                    <h4 class="fw-800 text-dark mb-0">${t.subject}</h4>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="p-4 rounded-4 mb-4" style="background: rgba(20, 184, 166, 0.05);">
+                                        <div class="fw-800 text-primary mb-2 small text-uppercase ls-1">Expert Tips:</div>
+                                        <ul class="mb-0 small fw-600 text-dark list-unstyled">
+                                            ${t.tips.map(tip => `<li class="mb-2"><i class="fas fa-check text-success me-2"></i>${tip}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 bg-light border rounded-4 position-relative">
+                                        <button class="btn btn-sm btn-white position-absolute top-0 end-0 m-3 shadow-sm border" onclick="copyTemplate()">
+                                            <i class="fas fa-copy me-1 text-primary"></i> Copy
+                                        </button>
+                                        <div id="templateText" class="mb-0" style="white-space: pre-wrap; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #334155; line-height: 1.7;">${t.template}</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 p-4 pt-0 gap-3">
+                                    <button type="button" class="btn btn-light rounded-pill px-4 fw-700" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-premium rounded-pill px-4" onclick="copyTemplate()">
+                                        Copy to Clipboard
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('templateModal')?.remove();
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                new bootstrap.Modal(document.getElementById('templateModal')).show();
+            }
+        } catch (error) {
+            alert('Error loading template');
+        }
+    }
+
+    function copyTemplate() {
+        const text = document.getElementById('templateText').innerText;
+        const done = () => {
+            document.querySelectorAll('.modal button').forEach(btn => {
+                if (btn.innerHTML.includes('Copy')) {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => btn.innerHTML = original, 2000);
+                }
+            });
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+        } else {
+            fallbackCopy(text, done);
+        }
+    }
+
+    function fallbackCopy(text, callback) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); if (callback) callback(); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+</script>
+{% endblock %}
