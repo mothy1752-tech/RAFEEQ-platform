@@ -66,14 +66,13 @@ def register_user(username, email, password, full_name, user_type, disability_da
                 ''', (username, email, hashed_password, full_name, user_type))
             
             conn.commit()
-            cursor.close()
-            conn.close()
             return True, "Registration successful"
         except Exception as e:
             conn.rollback()
+            return False, str(e)
+        finally:
             cursor.close()
             conn.close()
-            return False, str(e)
     return False, "Database connection failed"
 
 def authenticate_user(username, password):
@@ -85,16 +84,15 @@ def authenticate_user(username, password):
         try:
             cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
             user = cursor.fetchone()
-            cursor.close()
-            conn.close()
-
+            
             if user and verify_password(password, user['password']):
                 return True, dict(user)
             return False, None
         except Exception as e:
+            return False, None
+        finally:
             cursor.close()
             conn.close()
-            return False, None
     return False, None
 
 def update_last_login(user_id):
@@ -106,8 +104,9 @@ def update_last_login(user_id):
         try:
             cursor.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s', (user_id,))
             conn.commit()
-            cursor.close()
-            conn.close()
         except Exception as e:
+            # Log error but don't crash
+            pass
+        finally:
             cursor.close()
             conn.close()
