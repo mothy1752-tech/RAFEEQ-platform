@@ -8,7 +8,26 @@ import base64
 import logging
 from werkzeug.utils import secure_filename
 
-# Utils Imports (Ensure these files exist in your project structure)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+
+# --- Configuration ---
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['GENERATED_RESUMES_FOLDER'] = 'generated_resumes'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Create necessary directories
+os.makedirs('uploads', exist_ok=True)
+os.makedirs('data/resumes', exist_ok=True)
+os.makedirs('generated_resumes', exist_ok=True)
+
+# --- Utils Imports (Safe Import) ---
+# نستخدم try-except لمنع تعطل التطبيق إذا كان هناك ملف ناقص
+utils_available = True
 try:
     from utils.text_processing import process_text, extract_pdf_text
     from utils.recommendations import get_job_recommendations, get_candidate_recommendations
@@ -20,10 +39,8 @@ try:
     from utils.transportation_manager import TransportationManager
     from utils.career_guidance import get_career_guidance, CareerGuidanceAI
 except ImportError as e:
-    logger = logging.getLogger(__name__)
     logger.error(f"Missing utility module: {e}")
-    # Create dummy functions if imports fail to prevent app crash during build
-    pass
+    utils_available = False
 
 from auth import login_required, register_user, authenticate_user, update_last_login
 from database import Database
@@ -34,23 +51,7 @@ try:
 except ImportError:
     register_rafeeq_routes = lambda app, jobs_df: None
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['GENERATED_RESUMES_FOLDER'] = 'generated_resumes'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-# IMPORTANT: Change this secret key in production
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-
-# Create necessary directories
-os.makedirs('uploads', exist_ok=True)
-os.makedirs('data/resumes', exist_ok=True)
-os.makedirs('generated_resumes', exist_ok=True)
-
-# Load datasets
+# --- Load Datasets ---
 jobs_df = pd.DataFrame()
 cities_df = pd.DataFrame()
 
@@ -70,9 +71,22 @@ if not os.path.exists(RESUMES_CSV_PATH):
                           'education', 'upload_date', 'processed_text', 'file_path']).to_csv(
         RESUMES_CSV_PATH, index=False)
 
-# Database Initialization
-# We create the DB instance, but we don't force crash if connection fails yet.
+# --- Database Initialization ---
 db = Database()
+DB_CONNECTED = False
+
+logger.info("Attempting to initialize database...")
+try:
+    db.create_tables()
+    logger.info("Database 'RAFEEQ' and tables initialized successfully")
+    DB_CONNECTED = True
+except Exception as e:
+    logger.error(f"Database initialization failed: {e}")
+    logger.warning("App will start, but Login/Register features will not work until DB is accessible.")
+    DB_CONNECTED = False
+
+
+# --- Routes ---
 
 @app.route('/')
 def home():
@@ -101,6 +115,8 @@ def dashboard():
             cursor.close()
             conn.close()
     
+    # Check if DB is connected for UI warning
+    stats['db_connected'] = DB_CONNECTED
     return render_template('dashboard.html', stats=stats)
 
 @app.route('/about')
@@ -129,7 +145,8 @@ def login():
         else:
             flash('Invalid username or password', 'danger')
     
-    return render_template('login.html')
+    # Pass db_connected to template to handle JS errors if needed
+    return render_template('login.html', db_connected=DB_CONNECTED)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -148,7 +165,7 @@ def register():
         else:
             flash(f'Registration failed: {message}', 'danger')
     
-    return render_template('register.html')
+    return render_template('register.html', db_connected=DB_CONNECTED)
 
 @app.route('/logout')
 def logout():
@@ -203,6 +220,8 @@ def profile():
             finally:
                 cursor.close()
                 conn.close()
+        else:
+            flash('Database connection failed. Cannot update profile.', 'danger')
         return redirect(url_for('profile'))
     return render_template('profile.html')
 
@@ -234,6 +253,8 @@ def settings():
             finally:
                 cursor.close()
                 conn.close()
+        else:
+            flash('Database connection failed.', 'danger')
         return redirect(url_for('settings'))
     return render_template('settings.html')
 
@@ -251,13 +272,15 @@ def jobs_map():
 @app.route('/api/recommend-jobs', methods=['POST'])
 def recommend_jobs():
     """API endpoint to get job recommendations based on uploaded resume"""
+    if not utils_available:
+        return jsonify({'success': False, 'error': 'Utility modules not loaded'}), 500
+
     try:
         file = request.files.get('resume')
         locations = request.form.getlist('locations[]')
         num_jobs = int(request.form.get('num_jobs', 10))
         
         if not file:
-            logger.warning("No file uploaded")
             return jsonify({'success': False, 'error': 'No file uploaded'}), 400
         
         if file.filename == '':
@@ -266,7 +289,7 @@ def recommend_jobs():
         try:
             pdf_text = extract_pdf_text(file)
             if not pdf_text or len(pdf_text.strip()) < 50:
-                return jsonify({'success': False, 'error': 'Could not extract enough text from PDF. Please ensure the PDF contains readable text.'}), 400
+                return jsonify({'success': False, 'error': 'Could not extract enough text from PDF'}), 400
         except ValueError as ve:
             logger.error(f"PDF extraction error: {ve}")
             return jsonify({'success': False, 'error': str(ve)}), 400
@@ -291,7 +314,7 @@ def recommend_jobs():
                 'success': True,
                 'recommendations': [],
                 'total_jobs': 0,
-                'message': 'No matching jobs found. Try adjusting your search criteria.'
+                'message': 'No matching jobs found.'
             })
         
         return jsonify({
@@ -302,21 +325,23 @@ def recommend_jobs():
     
     except Exception as e:
         logger.error(f"Error in recommend_jobs: {str(e)}")
-        return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/recommend-candidates', methods=['POST'])
 def recommend_candidates():
     """API endpoint to get candidate recommendations based on job description"""
+    if not utils_available:
+        return jsonify({'success': False, 'error': 'Utility modules not loaded'}), 500
+
     try:
         job_description = request.form.get('job_description')
         num_candidates = int(request.form.get('num_candidates', 5))
         
         if not job_description or not job_description.strip():
-            logger.warning("No job description provided")
             return jsonify({'success': False, 'error': 'No job description provided'}), 400
         
         if len(job_description.strip()) < 50:
-            return jsonify({'success': False, 'error': 'Job description is too short. Please provide more details.'}), 400
+            return jsonify({'success': False, 'error': 'Job description is too short'}), 400
         
         try:
             processed_jd = process_text(job_description)
@@ -328,15 +353,15 @@ def recommend_candidates():
         
         try:
             if not os.path.exists(RESUMES_CSV_PATH):
-                return jsonify({'success': False, 'error': 'No resumes database found. Please upload resumes first.'}), 404
+                return jsonify({'success': False, 'error': 'No resumes database found'}), 404
             
             resumes_df = pd.read_csv(RESUMES_CSV_PATH)
             
             if len(resumes_df) == 0:
-                return jsonify({'success': False, 'error': 'No resumes in database. Please upload resumes first.'}), 404
+                return jsonify({'success': False, 'error': 'No resumes in database'}), 404
             
             if 'processed_text' not in resumes_df.columns:
-                return jsonify({'success': False, 'error': 'Resume database is corrupted. Please re-upload resumes.'}), 500
+                return jsonify({'success': False, 'error': 'Resume database is corrupted'}), 500
             
         except Exception as e:
             logger.error(f"Error loading resumes: {e}")
@@ -366,16 +391,16 @@ def recommend_candidates():
             logger.error(f"Error getting recommendations: {e}")
             return jsonify({'success': False, 'error': 'Failed to generate recommendations'}), 500
     
-    except ValueError as ve:
-        logger.error(f"ValueError in recommend_candidates: {ve}")
-        return jsonify({'success': False, 'error': 'Invalid input parameters'}), 400
     except Exception as e:
         logger.error(f"Error in recommend_candidates: {str(e)}")
-        return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/generate-candidates', methods=['POST'])
 def generate_candidates():
-    """API endpoint to generate AI-powered candidate profiles matching job description"""
+    """API endpoint to generate AI-powered candidate profiles"""
+    if not utils_available:
+        return jsonify({'success': False, 'error': 'Utility modules not loaded'}), 500
+
     try:
         job_description = request.form.get('job_description')
         num_candidates = int(request.form.get('num_candidates', 5))
@@ -384,25 +409,20 @@ def generate_candidates():
             return jsonify({'success': False, 'error': 'No job description provided'}), 400
         
         if len(job_description.strip()) < 50:
-            return jsonify({'success': False, 'error': 'Job description is too short. Please provide more details.'}), 400
+            return jsonify({'success': False, 'error': 'Job description is too short'}), 400
         
-        # Limit number of candidates
         num_candidates = min(num_candidates, 10)
         
-        # Generate candidate profiles
         generated_profiles = generate_multiple_candidates(job_description, num_candidates)
         
-        # Save generated profiles to database
         resumes_df = pd.read_csv(RESUMES_CSV_PATH)
         
         for profile in generated_profiles:
-            # Create PDF for each candidate
             pdf_filename = f"{profile['candidate_id']}.pdf"
             pdf_path = os.path.join(app.config['GENERATED_RESUMES_FOLDER'], pdf_filename)
             
             create_resume_pdf(profile, pdf_path)
             
-            # Add to database
             new_resume = {
                 'resume_id': len(resumes_df) + 1,
                 'name': profile['name'],
@@ -418,10 +438,8 @@ def generate_candidates():
             
             resumes_df = pd.concat([resumes_df, pd.DataFrame([new_resume])], ignore_index=True)
         
-        # Save updated database
         resumes_df.to_csv(RESUMES_CSV_PATH, index=False)
         
-        # Prepare response data
         candidates_data = []
         for profile in generated_profiles:
             candidates_data.append({
@@ -433,7 +451,7 @@ def generate_candidates():
                 'experience': f"{profile['experience_years']}+ years",
                 'education': profile['education']['degree'],
                 'summary': profile['summary'],
-                'match_score': 0.95  # High match score for generated candidates
+                'match_score': 0.95
             })
         
         return jsonify({
@@ -445,7 +463,7 @@ def generate_candidates():
     
     except Exception as e:
         logger.error(f"Error in generate_candidates: {str(e)}")
-        return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/download-resume/<candidate_id>')
 def download_resume(candidate_id):
@@ -453,12 +471,9 @@ def download_resume(candidate_id):
     try:
         resumes_df = pd.read_csv(RESUMES_CSV_PATH)
         
-        # Find candidate by ID or name
         if candidate_id.startswith('GEN_'):
-            # Generated resume
             candidate = resumes_df[resumes_df['file_path'].str.contains(candidate_id, na=False)]
         else:
-            # Search by resume_id
             candidate = resumes_df[resumes_df['resume_id'] == int(candidate_id)]
         
         if candidate.empty:
@@ -470,7 +485,6 @@ def download_resume(candidate_id):
         if not os.path.exists(file_path):
             return jsonify({'success': False, 'error': 'Resume file not found'}), 404
         
-        # Prepare filename for download
         safe_name = candidate_name.replace(' ', '_')
         download_name = f"{safe_name}_Resume.pdf"
         
@@ -488,6 +502,9 @@ def download_resume(candidate_id):
 @app.route('/api/analyze-resume', methods=['POST'])
 def analyze_resume_api():
     """API endpoint to analyze uploaded resume"""
+    if not utils_available:
+        return jsonify({'success': False, 'error': 'Utility modules not loaded'}), 500
+
     new_resume = None
     filepath = None
     
@@ -570,7 +587,7 @@ def analyze_resume_api():
                 os.remove(filepath)
             except:
                 pass
-        return jsonify({'success': False, 'error': f'An error occurred: {str(e)}'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/stats')
 def get_stats():
@@ -903,24 +920,8 @@ def get_analytics():
         return jsonify({'error': str(e)}), 500
 
 # Register RAFEEQ routes
-try:
-    from rafeeq_routes import register_rafeeq_routes
-    register_rafeeq_routes(app, jobs_df)
-except ImportError:
-    pass
-
-# Initialize DB at startup (Runs on both Local and Render)
-# We do this here so it runs every time the app starts, ensuring tables exist.
-logger.info("Attempting to initialize database...")
-try:
-    db.create_tables()
-    logger.info("Database 'RAFEEQ' and tables initialized successfully")
-except Exception as e:
-    # If DB fails (e.g., IP not whitelisted yet), log error but don't crash the app
-    logger.error(f"Database initialization failed: {e}")
-    logger.error("App will start, but Login/Register features will not work until DB is accessible.")
+register_rafeeq_routes(app, jobs_df)
 
 if __name__ == '__main__':
     logger.info("Starting RAFEEQ Inclusive Employment Platform locally...")
-    # Note: Tables are already initialized above, so we don't need to call it here again.
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
