@@ -1,4 +1,3 @@
-
 import pymysql
 from pymysql import Error
 import os
@@ -8,16 +7,26 @@ logger = logging.getLogger(__name__)
 
 class Database:
     def __init__(self):
-        self.host = 'localhost'
-        self.user = 'root'
-        self.password = 'root'
-        self.port = 3306
-        self.database = 'RAFEEQ'
+        # إعدادات الاتصال بقاعدة البيانات البعيدة
+        # يتم قراءة القيم من Environment Variables (الأفضل للأمان)
+        # إذا لم توجد، يتم استخدام القيم الافتراضية الموضحة أدناه
+        
+        self.host = os.getenv('DB_HOST', '193.203.184.246')
+        self.user = os.getenv('DB_USER', 'u864760987_RAFEEQ')
+        self.password = os.getenv('DB_PASS', 'Raffek12342#')
+        self.port = int(os.getenv('DB_PORT', 3306))
+        
+        # ملاحظة: في الاستضافات المشتركة، عادة ما يكون اسم قاعدة البيانات مطابقاً لاسم المستخدم
+        # أو يبدأ ببادئة مشتركة. تأكد من الاسم الصحيح من لوحة تحكم الاستضافة (cPanel).
+        # لقد افترضت هنا أنه مطابق لاسم المستخدم.
+        self.database = os.getenv('DB_NAME', 'u864760987_RAFEEQ')
+        
         self.connection = None
         
     def create_database(self):
         """Create database if it doesn't exist"""
         try:
+            # الاتصال بدون تحديد قاعدة بيانات لمحاولة إنشائها
             conn = pymysql.connect(
                 host=self.host,
                 user=self.user,
@@ -31,8 +40,15 @@ class Database:
             conn.close()
             return True
         except Error as e:
-            logger.error(f"Error creating database: {e}")
-            raise
+            # في الاستضافات المشتركة، غالباً لا يملك المستخدم صلاحية CREATE DATABASE
+            # لذا نتجاهل الخطأ إذا كان بسبب الصلاحيات، ونفترض أن القاعدة موجودة
+            if "Access denied" in str(e) or "CREATE DATABASE" in str(e):
+                logger.warning(f"Could not create database (likely missing permissions): {e}")
+                logger.info(f"Assuming database '{self.database}' already exists on the server.")
+                return True
+            else:
+                logger.error(f"Error creating database: {e}")
+                raise
     
     def connect(self):
         """Connect to MySQL database"""
@@ -45,6 +61,7 @@ class Database:
                 database=self.database,
                 cursorclass=pymysql.cursors.DictCursor
             )
+            logger.info(f"Successfully connected to database '{self.database}' on host '{self.host}'")
             return self.connection
         except Error as e:
             logger.error(f"Error connecting to database: {e}")
@@ -53,10 +70,11 @@ class Database:
     def create_tables(self):
         """Create all necessary tables for RAFEEQ platform"""
         try:
+            # محاولة إنشاء قاعدة البيانات (قد تفشل في الاستضافات المشتركة وهذا طبيعي)
             self.create_database()
         except Exception as e:
             logger.error(f"Failed to create database: {e}")
-            raise
+            # لا نوقف البرنامج هنا، لنحاول الاتصال بالقاعدة المفترض وجودها
         
         conn = self.connect()
         if not conn:
@@ -317,13 +335,13 @@ class Database:
         if self.connection:
             self.connection.close()
 
-# Initialize database on import
+# Initialize database on import (Optionally)
+# It's better to call create_tables() explicitly in the app startup to control timing
 if __name__ == "__main__":
     db = Database()
     print("Creating database and tables...")
-    db.create_tables()
-    print("Database setup completed!")
-
-# Comment out auto-initialization to prevent errors during import
-# db = Database()
-# db.create_tables()
+    try:
+        db.create_tables()
+        print("Database setup completed!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
